@@ -1,6 +1,7 @@
 
 #include "cuda.h"
 #include "cuda_runtime_api.h"
+#include "gpudmaioctl.h"
 
 #include <dirent.h>
 #include <signal.h>

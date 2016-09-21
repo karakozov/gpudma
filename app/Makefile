@@ -9,7 +9,7 @@ ROOT_DIR = $(shell pwd)
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)gcc
 
-INCDIR := . $(CUDADIR)/include
+INCDIR := . $(CUDADIR)/include ../module
 INCLUDE := $(addprefix -I, $(INCDIR))
 CFLAGS := -D__LINUX__ -g -Wall $(INCLUDE)
 SRCFILE := $(wildcard *.cpp) 
