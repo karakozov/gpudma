@@ -9,11 +9,9 @@ ROOT_DIR = $(shell pwd)
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)gcc
 
-NVIDIA_DRIVER_PATH := /home/karak/gpudma/NVIDIA-Linux-x86_64
-NVIDIA_DRIVER_VER := 367.57
-NVIDIA_DRIVER := $(NVIDIA_DRIVER_PATH)-$(NVIDIA_DRIVER_VER)
+NVIDIA_DRIVER_PATH := $(HOME)/gpudma/nvidia
 
-INCDIR := . $(CUDADIR)/include ../module $(NVIDIA_DRIVER)/kernel/nvidia
+INCDIR := . $(CUDADIR)/include ../module $(NVIDIA_DRIVER_PATH)/kernel/nvidia
 INCLUDE := $(addprefix -I, $(INCDIR))
 CFLAGS := -D__LINUX__ -g -Wall $(INCLUDE)
 SRCFILE := $(wildcard *.cpp) 
