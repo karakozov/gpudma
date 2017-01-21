@@ -1,17 +1,14 @@
 
 KERNELVER := $(shell uname -r)
-NVIDIA_DRIVER_PATH := $(HOME)/cuda/NVIDIA-Linux-x86_64
-NVIDIA_DRIVER_VER := 367.44
-NVIDIA_DRIVER := $(NVIDIA_DRIVER_PATH)-$(NVIDIA_DRIVER_VER)
-KBUILD_EXTRA_SYMBOLS := $(NVIDIA_DRIVER)/kernel/Module.symvers
+NVIDIA_DRIVER_PATH := $(HOME)/gpudma/nvidia
+KBUILD_EXTRA_SYMBOLS := $(NVIDIA_DRIVER_PATH)/kernel/Module.symvers
 EXTRA_CFLAGS += -O2
-EXTRA_CFLAGS += -I../../include
-EXTRA_CFLAGS += -I$(HOME)/cuda/NVIDIA-Linux-x86_64-367.44/kernel/nvidia
+EXTRA_CFLAGS += -I$(NVIDIA_DRIVER_PATH)/kernel/nvidia
 
 ifneq ($(KERNELRELEASE),)
 
-obj-m += gpudma.o
-gpudma-objs := gpudmaproc.o ioctlrw.o gpudmadrv.o gpudmamem.o
+obj-m += gpumem.o
+gpumem-objs := gpumemproc.o ioctlrw.o gpumemdrv.o
 
 else
 

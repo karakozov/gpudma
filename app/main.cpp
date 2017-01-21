@@ -1,7 +1,7 @@
 
 #include "cuda.h"
 #include "cuda_runtime_api.h"
-#include "gpudmaioctl.h"
+#include "gpumemioctl.h"
 
 #include <dirent.h>
 #include <signal.h>
@@ -11,6 +11,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/uio.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 
 //-----------------------------------------------------------------------------
 
@@ -21,6 +28,16 @@ bool wasError(CUresult status);
 
 int main(int argc, char *argv[])
 {
+    gpudma_lock_t lock;
+    gpudma_state_t *state = 0;
+    int statesize = 0;
+    int res = -1;
+    int fd = open("/dev/"GPUMEM_DRIVER_NAME, O_RDWR, 0);
+    if (fd < 0) {
+        printf("Error open file %s\n", "/dev/"GPUMEM_DRIVER_NAME);
+        return -1;
+    }
+
     checkError(cuInit(0));
 
     int total = 0;
@@ -64,14 +81,61 @@ int main(int argc, char *argv[])
         goto do_free_memory;
     }
 
-    CUDA_POINTER_ATTRIBUTE_P2P_TOKENS tokens;
-    status = cuPointerGetAttribute(&tokens, CU_POINTER_ATTRIBUTE_P2P_TOKENS, dptr);
-    if(wasError(status)) {
+    fprintf(stderr, "Press enter to lock\n");
+    getchar();
+
+    // TODO: add kernel driver interaction...
+    lock.addr = dptr;
+    lock.size = size;
+    res = ioctl(fd, IOCTL_GPUMEM_LOCK, &lock);
+    if(res < 0) {
+        fprintf(stderr, "Error in IOCTL_GPUDMA_MEM_LOCK\n");
         goto do_free_attr;
     }
 
-    // TODO: add kernel driver interaction...
+    fprintf(stderr, "Press enter to get state. We lock %ld pages\n", lock.page_count);
+    getchar();
 
+    statesize = (lock.page_count*sizeof(uint64_t) + sizeof(struct gpudma_state_t));
+    state = (struct gpudma_state_t*)malloc(statesize);
+    if(!state) {
+        goto do_free_attr;
+    }
+    memset(state, 0, statesize);
+    state->page_count = lock.page_count;
+    res = ioctl(fd, IOCTL_GPUMEM_STATE, state);
+    if(res < 0) {
+        fprintf(stderr, "Error in IOCTL_GPUDMA_MEM_UNLOCK\n");
+        goto do_unlock;
+    }
+
+    fprintf(stderr, "Page count 0x%lx\n", state->page_count);
+    fprintf(stderr, "Page size 0x%lx\n", state->page_size);
+
+    for(unsigned i=0; i<state->page_count; i++) {
+        fprintf(stderr, "%02d: 0x%lx\n", i, state->pages[i]);
+        void* va = mmap(0, state->page_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, (off_t)state->pages[i]);
+        if(va == MAP_FAILED ) {
+             fprintf(stderr, "%s(): %s\n", __FUNCTION__, strerror(errno));
+             va = 0;
+        } else {
+            memset(va, 0x55, state->page_size);
+            fprintf(stderr, "%s(): Physical Address 0x%lx -> Virtual Address %p\n", __FUNCTION__, state->pages[i], va);
+            munmap(va, state->page_size);
+        }
+    }
+
+    fprintf(stderr, "Press enter to unlock\n");
+    getchar();
+
+do_unlock:
+    res = ioctl(fd, IOCTL_GPUMEM_UNLOCK, 0);
+    if(res < 0) {
+        fprintf(stderr, "Error in IOCTL_GPUDMA_MEM_UNLOCK\n");
+        goto do_free_state;
+    }
+do_free_state:
+    free(state);
 do_free_attr:
     flag = 0;
     cuPointerSetAttribute(&flag, CU_POINTER_ATTRIBUTE_SYNC_MEMOPS, dptr);
@@ -81,6 +145,8 @@ do_free_memory:
 
 do_free_context:
     cuCtxDestroy(context);
+
+    close(fd);
 
     return 0;
 }

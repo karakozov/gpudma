@@ -4,10 +4,9 @@
 
 //-----------------------------------------------------------------------------
 
-int ioctl_mem_open(struct gpudma_driver *drv, unsigned long arg);
-int ioctl_mem_close(struct gpudma_driver *drv, unsigned long arg);
-int ioctl_mem_lock(struct gpudma_driver *drv, unsigned long arg);
-int ioctl_mem_unlock(struct gpudma_driver *drv, unsigned long arg);
+int ioctl_mem_lock(struct gpumem *drv, unsigned long arg);
+int ioctl_mem_unlock(struct gpumem *drv, unsigned long arg);
+int ioctl_mem_state(struct gpumem *drv, unsigned long arg);
 
 //-----------------------------------------------------------------------------
 
