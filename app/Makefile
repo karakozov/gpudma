@@ -1,4 +1,4 @@
-
+ 
 PHONY = clean all
 TARGET_NAME = gpu_direct
 
@@ -9,7 +9,9 @@ ROOT_DIR = $(shell pwd)
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)gcc
 
-NVIDIA_DRIVER_PATH := $(HOME)/gpudma/nvidia
+#NVIDIA_DRIVER_PATH := $(HOME)/gpudma/nvidia
+NVIDIA_DRIVER_PATH := ../nvidia
+
 
 INCDIR := . $(CUDADIR)/include ../module $(NVIDIA_DRIVER_PATH)/kernel/nvidia
 INCLUDE := $(addprefix -I, $(INCDIR))

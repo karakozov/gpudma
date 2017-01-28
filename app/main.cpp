@@ -1,4 +1,4 @@
-
+  
 #include "cuda.h"
 #include "cuda_runtime_api.h"
 #include "gpumemioctl.h"
@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     gpudma_state_t *state = 0;
     int statesize = 0;
     int res = -1;
+    unsigned count=0x0A000000;
+
     int fd = open("/dev/"GPUMEM_DRIVER_NAME, O_RDWR, 0);
     if (fd < 0) {
         printf("Error open file %s\n", "/dev/"GPUMEM_DRIVER_NAME);
@@ -68,6 +70,8 @@ int main(int argc, char *argv[])
     size_t size = 0x100000;
     CUdeviceptr dptr = 0;
     unsigned int flag = 1;
+    unsigned char *h_odata = NULL;
+    h_odata = (unsigned char *)malloc(size);
 
     CUresult status = cuMemAlloc(&dptr, size);
     if(wasError(status)) {
@@ -119,11 +123,51 @@ int main(int argc, char *argv[])
              fprintf(stderr, "%s(): %s\n", __FUNCTION__, strerror(errno));
              va = 0;
         } else {
-            memset(va, 0x55, state->page_size);
+            //memset(va, 0x55, state->page_size);
+        	unsigned *ptr=(unsigned*)va;
+        	for( unsigned jj=0; jj<(state->page_size/4); jj++ )
+        	{
+        		*ptr++=count++;
+        	}
+
             fprintf(stderr, "%s(): Physical Address 0x%lx -> Virtual Address %p\n", __FUNCTION__, state->pages[i], va);
             munmap(va, state->page_size);
         }
     }
+
+    {
+    	const void* d_idata = (const void*)dptr;
+    	cudaMemcpy(h_odata, d_idata, size, cudaMemcpyDeviceToHost);
+    	cudaDeviceSynchronize();
+    	unsigned *ptr = (unsigned*)h_odata;
+    	unsigned val;
+    	unsigned expect_data=0x0A000000;
+    	unsigned cnt=size/4;
+    	unsigned error_cnt=0;
+    	for( unsigned ii=0; ii<cnt; ii++ )
+    	{
+    		val=*ptr++;
+    		if( val!=expect_data )
+    		{
+    			error_cnt++;
+    			if( error_cnt<32 )
+    			 fprintf(stderr, "%4d 0x%.8X - Error  expect: 0x%.8X\n", ii, val, expect_data );
+    		} else if( ii<16 )
+    		{
+      		  fprintf(stderr, "%4d 0x%.8X \n", ii, val );
+    		}
+    		expect_data++;
+
+    	}
+    	if( 0==error_cnt )
+    	{
+    		  fprintf(stderr, "\nTest successful\n" );
+    	} else
+    	{
+    		  fprintf(stderr, "\nTest with error\n" );
+    	}
+    }
+
 
     fprintf(stderr, "Press enter to unlock\n");
     getchar();
