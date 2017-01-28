@@ -11,8 +11,8 @@
 #include <linux/interrupt.h>
 #include <linux/miscdevice.h>
 #include <linux/platform_device.h>
-#include <linux/of.h>
-#include <linux/of_platform.h>
+//#include <linux/of.h>
+//#include <linux/of_platform.h>
 #include <asm/io.h>
 
 #include <asm/uaccess.h>
