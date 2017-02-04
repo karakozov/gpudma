@@ -79,6 +79,11 @@ public:
 
     CL_Cuda::BAR1_BUF	m_Bar1[3];	//!< description of buffer in BAR1
 
+
+    uint64_t			m_CurrentCounter;
+
+    void FillCounter( CL_Cuda::BAR1_BUF *pBar1 );
+
 };
 
 #endif /* TF_TESTCNT_H_ */

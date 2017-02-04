@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <signal.h>
 
+
 #include <assert.h>
 
 
@@ -71,7 +72,8 @@ int main(int argc, char **argv)
 
 	}
 
-//	ret=cuda( argc, argv );
+	//fprintf( stderr, "\nPress any key for exit\n" );
+	//getchar();
 
     return ret;
 }

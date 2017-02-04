@@ -72,6 +72,13 @@ CL_Cuda::CL_Cuda( int argc, char** argv )
 
 	checkError(cuInit(0));
 
+//	int total = 0;
+//	cudaGetDeviceCount( &total );
+//	fprintf(stderr, "Total devices: %d\n", total);
+//
+	pd->devID=0;
+ 	cudaSetDevice(pd->devID);
+
     int total = 0;
     checkError(cuDeviceGetCount(&total));
     fprintf(stderr, "Total devices: %d\n", total);
@@ -97,6 +104,10 @@ CL_Cuda::CL_Cuda( int argc, char** argv )
 
 
     checkError(cuCtxCreate(&pd->context, 0, pd->device));
+	//checkError(cuCtxGetCurrent(&pd->context));
+
+    pd->devID=0;
+    //cudaSetDevice(pd->devID);
 
 
     pd->fd = open("/dev/"GPUMEM_DRIVER_NAME, O_RDWR, 0);
