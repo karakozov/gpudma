@@ -8,6 +8,10 @@
 #ifndef TF_TEST_H_
 #define TF_TEST_H_
 
+
+/**
+ * 	\brief	Base class for testing device
+ */
 class TF_Test
 {
 

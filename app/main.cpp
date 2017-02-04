@@ -1,6 +1,6 @@
   
 #include "cuda.h"
-#include "cuda_runtime_api.h"
+//#include "cuda_runtime_api.h"
 #include "gpumemioctl.h"
 
 #include <dirent.h>
@@ -137,8 +137,12 @@ int main(int argc, char *argv[])
 
     {
     	const void* d_idata = (const void*)dptr;
-    	cudaMemcpy(h_odata, d_idata, size, cudaMemcpyDeviceToHost);
-    	cudaDeviceSynchronize();
+    	//cudaMemcpy(h_odata, d_idata, size, cudaMemcpyDeviceToHost);
+    	//cudaDeviceSynchronize();
+
+    	cuMemcpyDtoH( h_odata, dptr, size );
+    	cuCtxSynchronize();
+
     	unsigned *ptr = (unsigned*)h_odata;
     	unsigned val;
     	unsigned expect_data=0x0A000000;

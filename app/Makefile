@@ -22,7 +22,7 @@ OBJFILE := $(patsubst %.cpp,%.o, $(SRCFILE))
 #LDFLAGS := -Wl,-rpath,$(CUDADIR)/lib64/stubs -L"$(CUDADIR)/lib64/stubs" -lcuda
 #LDFLAGS :=  -L/usr/local/cuda/lib64 -lcudart -L/usr/local/cuda/lib64/stubs -lcuda $(LIBS)
 LDFLAGS +=  -L$(CUDADIR)/lib64 -lcuda
-LDFLAGS +=  -L$(CUDADIR)/lib64 -lcudart
+#LDFLAGS +=  -L$(CUDADIR)/lib64 -lcudart
 LDFLAGS +=  -lstdc++
 
 $(TARGET_NAME): $(OBJFILE)
