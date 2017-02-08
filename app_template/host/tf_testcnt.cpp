@@ -14,124 +14,41 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
+#include "task_data.h"
 
 int init_cuda(int argc, char **argv);
 int run_cuda( void );
 
-TF_TestCnt::TF_TestCnt( int argc, char **argv )
+
+
+
+TF_TestCnt::TF_TestCnt( int argc, char **argv ) : TF_TestThread( argc, argv )
 {
 	// TODO Auto-generated constructor stub
 
-	m_isPrepareComplete=0;
-	m_isComplete=0;
-	m_isComplete=0;
-	m_isTerminate=0;
-	m_CycleCnt=0;
+	td = new TaskData;
+
 
 	m_pCuda=NULL;
 
-
-	pthread_mutex_t		m_StartMutex = PTHREAD_MUTEX_INITIALIZER;
-	pthread_cond_t		m_StartCond  = PTHREAD_COND_INITIALIZER;
-
 	m_argc=argc;
 	m_argv=argv;
-	//init_cuda( argc, argv );
+
 }
 
 TF_TestCnt::~TF_TestCnt() {
 
 	delete m_pCuda; m_pCuda=NULL;
+	delete td; 		td=NULL;
 }
 
 
-
-int 	TF_TestCnt::Prepare( int cnt )
-{
-		if( 0==cnt )
-		{
-		    int res = pthread_attr_init(&m_attrThread);
-		    if(res != 0) {
-		        fprintf(stderr, "%s\n", "Stream not started");
-		        throw( "Stream not started" );
-		    }
-
-		    res = pthread_attr_setdetachstate(&m_attrThread, PTHREAD_CREATE_JOINABLE);
-		    if(res != 0) {
-		        fprintf(stderr, "%s\n", "Stream not started");
-		        throw( "Stream not started" );
-		    }
-
-		    res = pthread_create(&m_hThread, &m_attrThread, ThreadFunc, this);
-		    if(res != 0) {
-		        fprintf(stderr, "%s\n", "Stream not started");
-		        throw( "Stream not started" );
-		    }
-		}
-
-		int ret=m_isPrepareComplete;
-		if( ret )
-		{
-			printf( "Prepare - Ok\n");
-			//fprintf( stderr, "Prepare - Ok\n");
-
-		}
-
-		return ret;
-}
-
-void* TF_TestCnt::ThreadFunc( void* lpvThreadParm )
-{
-	TF_TestCnt *test=(TF_TestCnt*)lpvThreadParm;
-    void* ret;
-    if( !test )
-        return 0;
-    ret=test->Execute();
-    return ret;
-}
-
-void* TF_TestCnt::Execute( void )
-{
-		PrepareInThread();
-		m_isPrepareComplete=1;
-
-		// Wait for Start function
-		pthread_mutex_lock( &m_StartMutex );
-		pthread_cond_wait( &m_StartCond, &m_StartMutex );
-		pthread_mutex_unlock( &m_StartMutex );
-
-		fprintf( stderr, "Run\n");
-		Run();
-
-		CleanupInThread();
-
-		m_isComplete=1;
-		return NULL;
-}
-
-void	TF_TestCnt::Start( void )
-{
-
-	// Start Thread
-	pthread_mutex_lock( &m_StartMutex );
-	pthread_cond_signal( &m_StartCond );
-	pthread_mutex_unlock( &m_StartMutex );
-}
-
-void 	TF_TestCnt::Stop( void )
-{
-	m_isTerminate=1;
-	//fprintf( stderr, "%s - Ok\n", __FUNCTION__ );
-}
-
-int		TF_TestCnt::isComplete( void )
-{
-		return m_isComplete;
-}
 
 void	TF_TestCnt::StepTable( void )
 {
 
+	unsigned blockRd = td->ptrMonitor->block0.blockRd;
+	printf( "  %10d \r", blockRd );
 
 	//m_CycleCnt++;
 	//printf( "  %10d \r", m_CycleCnt );
@@ -144,8 +61,31 @@ void TF_TestCnt::PrepareInThread( void )
 
 	m_pCuda = new CL_Cuda( m_argc, m_argv );
 
-	m_Bar1[0].id=0;
-	m_pCuda->AllocateBar1Buffer( 256, &m_Bar1[0] );
+	td->monitor.id=100;
+
+
+	td->countOfBuffers=0;
+	int size=256;
+	td->sizeBufferOfBytes=size*1024;
+
+
+	for( int ii=0; ii<td->countOfBuffers ; ii++ )
+	{
+		td->bar1[ii].id=ii;
+		m_pCuda->AllocateBar1Buffer( size, &(td->bar1[ii]) );
+	}
+	m_pCuda->AllocateBar1Buffer( 256, &(td->monitor) );
+
+
+	td->ptrMonitor=(TaskMonitor*)td->monitor.app_addr[0];
+
+//	td->ptrMonitor->block0.ptrCudaIn=(void*)(td->bar1[0].cuda_addr);
+//	td->ptrMonitor->block1.ptrCudaIn=(void*)(td->bar1[1].cuda_addr);
+//	td->ptrMonitor->block2.ptrCudaIn=(void*)(td->bar1[2].cuda_addr);
+
+	td->ptrMonitor->flagExit=0;
+	td->ptrMonitor->sig=0xAA24;
+
 
 	fprintf( stderr, "%s - Ok\n", __FUNCTION__ );
 }
@@ -153,7 +93,11 @@ void TF_TestCnt::PrepareInThread( void )
 void TF_TestCnt::CleanupInThread( void )
 {
 
-	m_pCuda->FreeBar1Buffer( &m_Bar1[0] );
+	for( int ii=0; ii<td->countOfBuffers; ii++ )
+	{
+		m_pCuda->FreeBar1Buffer( &(td->bar1[ii]) );
+	}
+	m_pCuda->FreeBar1Buffer( &(td->monitor) );
 
 	delete m_pCuda; m_pCuda=NULL;
 
@@ -175,7 +119,7 @@ void TF_TestCnt::FillCounter( CL_Cuda::BAR1_BUF *pBar1 )
 
 	int size64=pBar1->page_size/8;
 	uint64_t *dst;
-	uint64_t val=m_CurrentCounter;
+	uint64_t val=td->currentCounter;
 
 	for( int page=0; page<pBar1->page_count; page++ )
 	{
@@ -184,43 +128,70 @@ void TF_TestCnt::FillCounter( CL_Cuda::BAR1_BUF *pBar1 )
 			*dst++=val++;
 
 	}
-	m_CurrentCounter=val;
+	td->currentCounter=val;
 }
 
 
 int run_checkCounter( long* src, long* dst, int size );
+int run_Monitor( long* src, cudaStream_t stream );
 
+/**
+ * 	\brief	Main working cycle
+ *
+ * 	It is main working cycle.
+ * 	Function FillCounter  simulate to work external DMA channel.
+ *
+ */
 void TF_TestCnt::Run( void )
 {
 
-	long *device_dst;
-	size_t size=256*1024;
-	cudaMalloc( (void**)(&device_dst), size );
-	fprintf( stderr, "sizeof(long)=%d\n", sizeof(long));
+//	long *device_dst;
+//	size_t size=256*1024;
+//	cudaMalloc( (void**)(&device_dst), size );
+//	fprintf( stderr, "sizeof(long)=%d\n", sizeof(long));
+//
+//	long *device_src=(long*)(td->m_Bar1[0].cuda_addr);
+//
+//	long *host_dst =(long*)malloc(size);
 
-	long *device_src=(long*)(m_Bar1[0].cuda_addr);
+	long *ptrCudaMonitor=(long*)(td->monitor.cuda_addr);
 
-	long *host_dst =(long*)malloc(size);
+	cudaStream_t	streamMonitor;
+	cudaStreamCreate( &streamMonitor );
+	run_Monitor( ptrCudaMonitor, streamMonitor );
+
+
 
 	for( ; ; )
 	{
 		if( m_isTerminate )
+		{
+			td->ptrMonitor->flagExit=1;
 			break;
+		}
 
-		FillCounter( &m_Bar1[0]);
-		//run_cuda();
-		run_checkCounter( device_src, device_dst, size );
+		td->ptrMonitor->block0.irqFlag=1;
 
-    	cudaMemcpy(host_dst, device_dst, size, cudaMemcpyDeviceToHost);
-    	cudaDeviceSynchronize();
+		for( volatile int jj=0; jj<100000000; jj++);
 
-    	for( int ii; ii<16; ii++ )
-    	{
-    		fprintf( stderr, " 0x%.8X\n", host_dst[ii]);
-    	}
-		m_CycleCnt++;
+//		FillCounter( &td->m_Bar1[0]);
+//		run_checkCounter( device_src, device_dst, size );
+//
+//    	cudaMemcpy(host_dst, device_dst, size, cudaMemcpyDeviceToHost);
+//    	cudaDeviceSynchronize();
+//
+//    	for( int ii; ii<16; ii++ )
+//    	{
+//    		fprintf( stderr, " 0x%.8X\n", host_dst[ii]);
+//    	}
+//		m_CycleCnt++;
 
-		break;
+
+		//td->ptrMonitor->flagExit=1;
+		//break;
 	}
+
+	cudaStreamSynchronize( streamMonitor );
+
 
 }

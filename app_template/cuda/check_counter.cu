@@ -21,6 +21,8 @@
 #include <helper_functions.h>
 #include <helper_cuda.h>
  
+#include "task_data.h"
+
 #ifndef MAX
 #define MAX(a,b) (a > b ? a : b)
 #endif
@@ -61,4 +63,46 @@ int run_checkCounter( long* src, long* dst, int size )
     checkCounterKernel<<<dimGrid, dimBlock>>>(src, dst, size );
 
     cudaDeviceSynchronize();
+}
+
+
+__global__ void MonitorKernel( long* src )
+{
+//    printf("[%d, %d]:\t\tValue is:%d\n",\
+//            blockIdx.y*gridDim.x+blockIdx.x,\
+//            threadIdx.z*blockDim.x*blockDim.y+threadIdx.y*blockDim.x+threadIdx.x,\
+//            sizeof(long));
+
+	printf( "Monitor start: src=%p  \n", src);
+
+	TaskMonitor *ptrMonitor = (TaskMonitor*)src;
+	for( int loop=0; ; loop++ )
+	{
+		if( 1==ptrMonitor->flagExit )
+		{
+			break;
+		}
+
+		if( 1==ptrMonitor->block0.irqFlag )
+		{
+			ptrMonitor->block0.irqFlag=2;
+			ptrMonitor->block0.blockRd++;
+
+		}
+	}
+	printf( "Monitor stop \n");
+
+
+}
+
+int run_Monitor( long* src, cudaStream_t stream )
+{
+
+    //Kernel configuration, where a two-dimensional grid and
+    //three-dimensional blocks are configured.
+    dim3 dimGrid(1, 1);
+    dim3 dimBlock(1, 1, 1);
+    MonitorKernel<<<dimGrid, dimBlock, 0, stream>>>(src );
+
+
 }

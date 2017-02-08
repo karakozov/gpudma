@@ -8,12 +8,15 @@
 #ifndef TF_TESTCNT_H_
 #define TF_TESTCNT_H_
 
-#include <pthread.h>
-#include "tf_test.h"
+
+#include "tf_testthread.h"
 
 //class CL_Cuda;
 //struct CL_Cuda::BAR1_BUF;
 #include "cl_cuda.h"
+
+
+struct TaskData;
 
 /**
  *	\brief	Checking the transmission counter at CUDA device
@@ -33,56 +36,34 @@
  *
  *
  */
-class TF_TestCnt: public TF_Test {
+class TF_TestCnt: public TF_TestThread
+{
 public:
 	TF_TestCnt( int argc, char **argv );
 	virtual ~TF_TestCnt();
 
 
-	virtual int 	Prepare( int cnt );
-
-	virtual void	Start( void );
-
-	virtual void 	Stop( void );
-
-	virtual int		isComplete( void );
-
 	virtual void	StepTable( void );
 
+	virtual void PrepareInThread( void );
 
-	static void* ThreadFunc( void* lpvThreadParm );
+	virtual void CleanupInThread( void );
 
-	void* Execute( void );
-
-	void PrepareInThread( void );
-
-	void CleanupInThread( void );
-
-	void Run( void );
+	virtual void Run( void );
 
 	int	m_argc;
 	char** m_argv;
 
-	int	m_isPrepareComplete;
-	int	m_isComplete;
-	int m_isTerminate;
 
-	int	m_CycleCnt;
 
-	pthread_mutex_t		m_StartMutex;
-	pthread_cond_t		m_StartCond;
 
-    pthread_t 			m_hThread;
-    pthread_attr_t  	m_attrThread;
+
+	struct TaskData		*td;		//!< Local data for test
 
     CL_Cuda				*m_pCuda;	//!< Cuda device
 
-    CL_Cuda::BAR1_BUF	m_Bar1[3];	//!< description of buffer in BAR1
-
-
-    uint64_t			m_CurrentCounter;
-
     void FillCounter( CL_Cuda::BAR1_BUF *pBar1 );
+
 
 };
 

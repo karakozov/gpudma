@@ -34,7 +34,7 @@ public:
 		size_t		sizeOfBytes;//!< Size buffer of bytes
 		int 	    page_count;	//!< Count of pages
 		int	      	page_size;	//!< Size of page
-		CUdeviceptr cuda_addr;	//!< address in CUDA memory
+		void*		cuda_addr;	//!< address in CUDA memory
 		uint64_t*   phy_addr;	//!< Array of physical addresses of pages
 		void**		app_addr; 	//!< Array of virtual addresses of pages in the application address space
 

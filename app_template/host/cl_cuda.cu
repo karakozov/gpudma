@@ -70,6 +70,8 @@ CL_Cuda::CL_Cuda( int argc, char** argv )
 
 	pd = new CL_Cuda_private();
 
+	cudaDeviceReset();
+
 	checkError(cuInit(0));
 
 //	int total = 0;
@@ -197,7 +199,7 @@ void CL_Cuda::AllocateBar1Buffer( int sizeOfKb, BAR1_BUF *pAdr )
 
     pAdr->page_count=state->page_count;
     pAdr->page_size=state->page_size;
-    pAdr->cuda_addr=dptr;
+    pAdr->cuda_addr=(void*)dptr;
     pAdr->sizeOfBytes=size;
 
 
@@ -258,7 +260,7 @@ void CL_Cuda::FreeBar1Buffer( BAR1_BUF *pAdr )
 	}
 
 	// free CUDA memory
-	cuMemFree(pAdr->cuda_addr);
+	cuMemFree((CUdeviceptr)(pAdr->cuda_addr));
 
 	// free array
 	delete pAdr->app_addr; pAdr->app_addr=NULL;
