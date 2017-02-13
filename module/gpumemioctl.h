@@ -17,7 +17,9 @@
 #define GPUMEM_MAKE_IOCTL(c) _IO(GPUMEM_DEVICE_TYPE, (c))
 #endif
 
+#ifdef __KERNEL__
 #include "nv-p2p.h"
+#endif
 
 #define IOCTL_GPUMEM_LOCK		GPUMEM_MAKE_IOCTL(10)
 #define IOCTL_GPUMEM_UNLOCK		GPUMEM_MAKE_IOCTL(11)

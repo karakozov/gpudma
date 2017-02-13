@@ -27,6 +27,7 @@ LDFLAGS +=  -lstdc++
 
 $(TARGET_NAME): $(OBJFILE)
 	$(LD) $(notdir $^) -o $(TARGET_NAME) $(LDFLAGS)
+	cp $(TARGET_NAME) ../bin
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c -MD $<
