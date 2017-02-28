@@ -14,11 +14,19 @@
 
 //-----------------------------------------------------------------------------
 
+struct gpumem_t {
+    struct list_head list;
+    void *handle;
+    u64 virt_start;
+    nvidia_p2p_page_table_t* page_table;
+};
+
+//-----------------------------------------------------------------------------
+
 struct gpumem {
     struct semaphore         sem;
     struct proc_dir_entry*   proc;
-    nvidia_p2p_page_table_t* page_table;
-    u64 virt_start;
+    struct list_head         table_list;
 };
 
 //-----------------------------------------------------------------------------

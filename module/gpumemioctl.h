@@ -17,10 +17,6 @@
 #define GPUMEM_MAKE_IOCTL(c) _IO(GPUMEM_DEVICE_TYPE, (c))
 #endif
 
-#ifdef __KERNEL__
-#include "nv-p2p.h"
-#endif
-
 #define IOCTL_GPUMEM_LOCK		GPUMEM_MAKE_IOCTL(10)
 #define IOCTL_GPUMEM_UNLOCK		GPUMEM_MAKE_IOCTL(11)
 #define IOCTL_GPUMEM_STATE		GPUMEM_MAKE_IOCTL(12)
@@ -35,7 +31,7 @@
 //-----------------------------------------------------------------------------
 
 struct gpudma_lock_t {
-
+    void*    handle;
     uint64_t addr;
     uint64_t size;
     size_t   page_count;
@@ -43,8 +39,14 @@ struct gpudma_lock_t {
 
 //-----------------------------------------------------------------------------
 
-struct gpudma_state_t {
+struct gpudma_unlock_t {
+    void*    handle;
+};
 
+//-----------------------------------------------------------------------------
+
+struct gpudma_state_t {
+    void*       handle;
     size_t      page_count;
     size_t      page_size;
     uint64_t    pages[1];

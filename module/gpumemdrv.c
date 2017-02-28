@@ -132,9 +132,8 @@ static int __init gpumem_init(void)
 {
     pr_info(GPUMEM_DRIVER_NAME ": %s()\n", __func__);
     dev.proc = 0;
-    dev.page_table = 0;
-    dev.virt_start = 0ULL;
     sema_init(&dev.sem, 1);
+    INIT_LIST_HEAD(&dev.table_list);
     gpumem_register_proc(GPUMEM_DRIVER_NAME, 0, &dev);
     misc_register(&gpumem_dev);
     return 0;

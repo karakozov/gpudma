@@ -30,7 +30,8 @@ struct log_buf_t {
 
 static void show_mem_info( struct gpumem *drv, struct seq_file *m )
 {
-    int i=0;
+    struct list_head *pos, *n;
+    int i=0, idx=0;
     if(!drv || !m) {
         printk(KERN_DEBUG"%s(): EINVAL\n", __FUNCTION__ );
         return;
@@ -38,22 +39,30 @@ static void show_mem_info( struct gpumem *drv, struct seq_file *m )
 
     print_info(m, "%s\n", "Pinned memory info:");
 
-    //down(&drv->sem);
+    list_for_each_safe(pos, n, &drv->table_list) {
 
-    if(drv->virt_start) {
+        struct gpumem_t *entry = list_entry(pos, struct gpumem_t, list);
+        if(entry) {
+            if(entry->virt_start) {
 
-        print_info(m, "Number of pages - %d\n", drv->page_table->entries);
-        print_info(m, "Page size - 0x%x\n", get_nv_page_size(drv->page_table->page_size));
+                print_info(m, "%d: Entry - %p\n", idx, entry);
+                print_info(m, "Virtual GPU address - 0x%llx\n", entry->virt_start);
+                print_info(m, "Number of pages - %d\n", entry->page_table->entries);
+                print_info(m, "Page size - 0x%x\n", get_nv_page_size(entry->page_table->page_size));
 
-        for(i=0; i<drv->page_table->entries; i++) {
-            struct nvidia_p2p_page *nvp = drv->page_table->pages[i];
-            if(nvp) {
-                print_info(m, "%02d: - 0x%llx\n", i, nvp->physical_address);
+                for(i=0; i<entry->page_table->entries; i++) {
+                    struct nvidia_p2p_page *nvp = entry->page_table->pages[i];
+                    if(nvp) {
+                        print_info(m, "%02d: - 0x%llx\n", i, nvp->physical_address);
+                    }
+                }
+
+                print_info(m, "\n");
+
+                ++idx;
             }
         }
     }
-
-    //up(&drv->sem);
 }
 
 //--------------------------------------------------------------------
@@ -71,7 +80,11 @@ static int gpumem_proc_show(struct seq_file *m, void *v)
 
 static int gpumem_proc_open(struct inode *inode, struct file *file)
 {
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 9, 0))
     struct gpumem *p = (struct gpumem *)PDE_DATA(inode);
+#else
+    struct gpumem *p = (struct gpumem *)PDE(inode)->data;
+#endif
     return single_open(file, gpumem_proc_show, p);
 }
 

@@ -29,6 +29,7 @@ bool wasError(CUresult status);
 int main(int argc, char *argv[])
 {
     gpudma_lock_t lock;
+    gpudma_unlock_t unlock;
     gpudma_state_t *state = 0;
     int statesize = 0;
     int res = -1;
@@ -106,6 +107,7 @@ int main(int argc, char *argv[])
         goto do_free_attr;
     }
     memset(state, 0, statesize);
+    state->handle = lock.handle;
     state->page_count = lock.page_count;
     res = ioctl(fd, IOCTL_GPUMEM_STATE, state);
     if(res < 0) {
@@ -177,7 +179,8 @@ int main(int argc, char *argv[])
     getchar();
 
 do_unlock:
-    res = ioctl(fd, IOCTL_GPUMEM_UNLOCK, 0);
+    unlock.handle = lock.handle;
+    res = ioctl(fd, IOCTL_GPUMEM_UNLOCK, &unlock);
     if(res < 0) {
         fprintf(stderr, "Error in IOCTL_GPUDMA_MEM_UNLOCK\n");
         goto do_free_state;
