@@ -35,8 +35,8 @@ void free_nvp_callback(void *data)
         res = nvidia_p2p_free_page_table(entry->page_table);
         if(res == 0) {
             printk(KERN_ERR"%s(): nvidia_p2p_free_page_table() - OK!\n", __FUNCTION__);
-            entry->virt_start = 0ULL;
-            entry->page_table = 0;
+            //entry->virt_start = 0ULL;
+            //entry->page_table = 0;
         } else {
             printk(KERN_ERR"%s(): Error in nvidia_p2p_free_page_table()\n", __FUNCTION__);
         }
@@ -65,6 +65,9 @@ int ioctl_mem_lock(struct gpumem *drv, unsigned long arg)
         goto do_exit;
     }
 
+    INIT_LIST_HEAD(&entry->list);
+    entry->handle = entry;
+
     entry->virt_start = (param.addr & GPU_BOUND_MASK);
     pin_size = (param.addr + param.size - entry->virt_start);
     if(!pin_size) {
@@ -83,15 +86,17 @@ int ioctl_mem_lock(struct gpumem *drv, unsigned long arg)
     param.page_count = entry->page_table->entries;
     param.handle = entry;
 
+    printk(KERN_ERR"%s(): param.handle: %p\n", __FUNCTION__, param.handle);
+
     if(copy_to_user((void *)arg, &param, sizeof(struct gpudma_lock_t))) {
         printk(KERN_ERR"%s(): Error in copy_from_user()\n", __FUNCTION__);
         error = -EFAULT;
         goto do_unlock_pages;
     }
 
-    INIT_LIST_HEAD(&entry->list);
-    entry->handle = entry;
     list_add_tail(&entry->list, &drv->table_list);
+
+    printk(KERN_ERR"%s(): Add new entry. handle: %p\n", __FUNCTION__, entry->handle);
 
     return 0;
 
@@ -110,6 +115,7 @@ int ioctl_mem_unlock(struct gpumem *drv, unsigned long arg)
     int error = -EINVAL;
     struct gpumem_t *entry = 0;
     struct gpudma_unlock_t param;
+    struct list_head *pos, *n;
 
     if(copy_from_user(&param, (void *)arg, sizeof(struct gpudma_unlock_t))) {
         printk(KERN_ERR"%s(): Error in copy_from_user()\n", __FUNCTION__);
@@ -117,28 +123,31 @@ int ioctl_mem_unlock(struct gpumem *drv, unsigned long arg)
         goto do_exit;
     }
 
-    entry = container_of(param.handle, struct gpumem_t, handle);
-    if(entry) {
+    list_for_each_safe(pos, n, &drv->table_list) {
 
-        struct list_head *pos, *n;
+        entry = list_entry(pos, struct gpumem_t, list);
+        if(entry) {
+            if(entry->handle == param.handle) {
 
-        if(entry->virt_start && entry->page_table) {
-            error = nvidia_p2p_put_pages(0, 0, entry->virt_start, entry->page_table);
-            if(error != 0) {
-                printk(KERN_ERR"%s(): Error in nvidia_p2p_put_pages()\n", __FUNCTION__);
-                goto do_exit;
-            }
-            entry->virt_start = 0ULL;
-            entry->page_table = 0;
-            printk(KERN_ERR"%s(): nvidia_p2p_put_pages() - Ok!\n", __FUNCTION__);
-        }
+                printk(KERN_ERR"%s(): param.handle = %p\n", __FUNCTION__, param.handle);
+                printk(KERN_ERR"%s(): entry.handle = %p\n", __FUNCTION__, entry->handle);
 
-        list_for_each_safe(pos, n, &drv->table_list) {
-            entry = list_entry(pos, struct gpumem_t, list);
-            if(entry == param.handle) {
-                    list_del(pos);
-                    kfree(entry);
-                    break;
+                if(entry->virt_start && entry->page_table) {
+                    error = nvidia_p2p_put_pages(0, 0, entry->virt_start, entry->page_table);
+                    if(error != 0) {
+                        printk(KERN_ERR"%s(): Error in nvidia_p2p_put_pages()\n", __FUNCTION__);
+                        goto do_exit;
+                    }
+                    //entry->virt_start = 0ULL;
+                    //entry->page_table = 0;
+                    printk(KERN_ERR"%s(): nvidia_p2p_put_pages() - Ok!\n", __FUNCTION__);
+                }
+
+                list_del(pos);
+                kfree(entry);
+                break;
+            } else {
+                printk(KERN_ERR"%s(): Skip entry: %p\n", __FUNCTION__, entry->handle);
             }
         }
     }
@@ -157,6 +166,7 @@ int ioctl_mem_state(struct gpumem *drv, unsigned long arg)
     struct gpumem_t *entry = 0;
     struct gpudma_state_t header;
     struct gpudma_state_t *param;
+    struct list_head *pos, *n;
 
     if(copy_from_user(&header, (void *)arg, sizeof(struct gpudma_state_t))) {
         printk(KERN_ERR"%s(): Error in copy_from_user()\n", __FUNCTION__);
@@ -164,42 +174,52 @@ int ioctl_mem_state(struct gpumem *drv, unsigned long arg)
         goto do_exit;
     }
 
-    entry = container_of(header.handle, struct gpumem_t, handle);
-    if(entry) {
+    list_for_each_safe(pos, n, &drv->table_list) {
 
-        if(!entry->page_table) {
-            printk(KERN_ERR"%s(): Error - memory not pinned!\n", __FUNCTION__);
-            return -EINVAL;
-        }
+        entry = list_entry(pos, struct gpumem_t, list);
+        if(entry) {
+            if(entry->handle == header.handle) {
 
-        if((entry->page_table->entries != header.page_count) || (entry->handle != header.handle)) {
-            printk(KERN_ERR"%s(): Error - page counters or handle invalid!\n", __FUNCTION__);
-            return -EINVAL;
-        }
+                printk(KERN_ERR"%s(): param.handle = %p\n", __FUNCTION__, header.handle);
+                printk(KERN_ERR"%s(): entry.handle = %p\n", __FUNCTION__, entry->handle);
 
-        size = (sizeof(uint64_t)*header.page_count) + sizeof(struct gpudma_state_t);
-        param = kzalloc(size, GFP_KERNEL);
-        if(!param) {
-            printk(KERN_ERR"%s(): Error allocate memory!\n", __FUNCTION__);
-            return -ENOMEM;
-        }
-        param->page_size = get_nv_page_size(entry->page_table->page_size);
-        for(i=0; i<entry->page_table->entries; i++) {
-            struct nvidia_p2p_page *nvp = entry->page_table->pages[i];
-            if(nvp) {
-                param->pages[i] = nvp->physical_address;
-                param->page_count++;
-                printk(KERN_ERR"%s(): %02d - 0x%llx\n", __FUNCTION__, i, param->pages[i]);
+                if(!entry->page_table) {
+                    printk(KERN_ERR"%s(): Error - memory not pinned!\n", __FUNCTION__);
+                    return -EINVAL;
+                }
+
+                if((entry->page_table->entries != header.page_count) || (entry->handle != header.handle)) {
+                    printk(KERN_ERR"%s(): Error - page counters or handle invalid!\n", __FUNCTION__);
+                    return -EINVAL;
+                }
+
+                size = (sizeof(uint64_t)*header.page_count) + sizeof(struct gpudma_state_t);
+                param = kzalloc(size, GFP_KERNEL);
+                if(!param) {
+                    printk(KERN_ERR"%s(): Error allocate memory!\n", __FUNCTION__);
+                    return -ENOMEM;
+                }
+                param->page_size = get_nv_page_size(entry->page_table->page_size);
+                for(i=0; i<entry->page_table->entries; i++) {
+                    struct nvidia_p2p_page *nvp = entry->page_table->pages[i];
+                    if(nvp) {
+                        param->pages[i] = nvp->physical_address;
+                        param->page_count++;
+                        printk(KERN_ERR"%s(): %02d - 0x%llx\n", __FUNCTION__, i, param->pages[i]);
+                    }
+                }
+                printk(KERN_ERR"%s(): page_count = %ld\n", __FUNCTION__, (long int)param->page_count);
+                param->handle = header.handle;
+                if(copy_to_user((void *)arg, param, size)) {
+                    printk(KERN_DEBUG"%s(): Error in copy_to_user()\n", __FUNCTION__);
+                    error = -EFAULT;
+                }
+
+                kfree(param);
+            } else {
+                printk(KERN_ERR"%s(): Skip entry: %p\n", __FUNCTION__, entry->handle);
             }
         }
-        printk(KERN_ERR"%s(): page_count = %ld\n", __FUNCTION__, (long int)param->page_count);
-
-        if(copy_to_user((void *)arg, param, size)) {
-            printk(KERN_DEBUG"%s(): Error in copy_to_user()\n", __FUNCTION__);
-            error = -EFAULT;
-        }
-
-        kfree(param);
     }
 
 do_exit:

@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stderr, "Press enter to lock\n");
-    getchar();
+    //getchar();
 
     // TODO: add kernel driver interaction...
     lock.addr = dptr;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stderr, "Press enter to get state. We lock %ld pages\n", lock.page_count);
-    getchar();
+    //getchar();
 
     statesize = (lock.page_count*sizeof(uint64_t) + sizeof(struct gpudma_state_t));
     state = (struct gpudma_state_t*)malloc(statesize);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     }
 
     {
-    	const void* d_idata = (const void*)dptr;
+        //const void* d_idata = (const void*)dptr;
     	//cudaMemcpy(h_odata, d_idata, size, cudaMemcpyDeviceToHost);
     	//cudaDeviceSynchronize();
 
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 
 
     fprintf(stderr, "Press enter to unlock\n");
-    getchar();
+    //getchar();
 
 do_unlock:
     unlock.handle = lock.handle;
