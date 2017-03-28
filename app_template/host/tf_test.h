@@ -27,7 +27,7 @@ public:
 
 	virtual void	StepTable( void ) {};
 
-
+	virtual void	GetResult( void ) {};
 };
 
 

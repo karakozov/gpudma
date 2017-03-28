@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 			pTest->StepTable();
 		}
 
+		//pTest->GetResult();
+
 		delete pTest; pTest=NULL;
 
 	} catch( ... )

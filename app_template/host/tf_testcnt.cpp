@@ -47,8 +47,8 @@ TF_TestCnt::~TF_TestCnt() {
 void	TF_TestCnt::StepTable( void )
 {
 
-	unsigned blockRd = td->ptrMonitor->block0.blockRd;
-	printf( "  %10d \r", blockRd );
+	unsigned blockRd = td->ptrMonitor->block[0].blockRd;
+	//printf( "  %10d \r", blockRd );
 
 	//m_CycleCnt++;
 	//printf( "  %10d \r", m_CycleCnt );
@@ -64,7 +64,7 @@ void TF_TestCnt::PrepareInThread( void )
 	td->monitor.id=100;
 
 
-	td->countOfBuffers=0;
+	td->countOfBuffers=3;
 	int size=256;
 	td->sizeBufferOfBytes=size*1024;
 
@@ -79,9 +79,12 @@ void TF_TestCnt::PrepareInThread( void )
 
 	td->ptrMonitor=(TaskMonitor*)td->monitor.app_addr[0];
 
-//	td->ptrMonitor->block0.ptrCudaIn=(void*)(td->bar1[0].cuda_addr);
-//	td->ptrMonitor->block1.ptrCudaIn=(void*)(td->bar1[1].cuda_addr);
-//	td->ptrMonitor->block2.ptrCudaIn=(void*)(td->bar1[2].cuda_addr);
+	for( int ii=0; ii<td->countOfBuffers; ii++ )
+	{
+		td->ptrMonitor->block[ii].ptrCudaIn=(void*)(td->bar1[ii].cuda_addr);
+
+		td->ptrMonitor->block[ii].sizeOfKBytes=size;
+	}
 
 	td->ptrMonitor->flagExit=0;
 	td->ptrMonitor->sig=0xAA24;
@@ -132,7 +135,7 @@ void TF_TestCnt::FillCounter( CL_Cuda::BAR1_BUF *pBar1 )
 }
 
 
-int run_checkCounter( long* src, long* dst, int size );
+int run_checkCounter( long *ptrMonitor, int nbuf, cudaStream_t& stream );
 int run_Monitor( long* src, cudaStream_t stream );
 
 /**
@@ -146,19 +149,49 @@ void TF_TestCnt::Run( void )
 {
 
 //	long *device_dst;
-//	size_t size=256*1024;
+	size_t size=256*1024;
 //	cudaMalloc( (void**)(&device_dst), size );
 //	fprintf( stderr, "sizeof(long)=%d\n", sizeof(long));
 //
-//	long *device_src=(long*)(td->m_Bar1[0].cuda_addr);
+	long *device_src=(long*)(td->bar1[0].cuda_addr);
+	long *device_dst=(long*)(td->bar1[1].cuda_addr);
 //
 //	long *host_dst =(long*)malloc(size);
 
+	FillCounter( &td->bar1[0]);
+	FillCounter( &td->bar1[1]);
+	FillCounter( &td->bar1[2]);
+
 	long *ptrCudaMonitor=(long*)(td->monitor.cuda_addr);
+
+	cudaStream_t	streamBuf0;
+	cudaStream_t	streamBuf1;
+	cudaStream_t	streamBuf2;
+
+	cudaStreamCreate( &streamBuf0 );
+	cudaStreamCreate( &streamBuf1 );
+	cudaStreamCreate( &streamBuf2 );
+
+
+	run_checkCounter(  ptrCudaMonitor, 0, streamBuf0 );
+	run_checkCounter(  ptrCudaMonitor, 1, streamBuf1 );
+	run_checkCounter(  ptrCudaMonitor, 2, streamBuf2 );
+
+	cudaStreamSynchronize( streamBuf0 );
+	cudaStreamSynchronize( streamBuf1 );
+	cudaStreamSynchronize( streamBuf2 );
+
+
+
+	GetResult();
+
+	return;
+
 
 	cudaStream_t	streamMonitor;
 	cudaStreamCreate( &streamMonitor );
-	run_Monitor( ptrCudaMonitor, streamMonitor );
+//	run_Monitor( ptrCudaMonitor, streamMonitor );
+
 
 
 
@@ -170,7 +203,7 @@ void TF_TestCnt::Run( void )
 			break;
 		}
 
-		td->ptrMonitor->block0.irqFlag=1;
+		td->ptrMonitor->block[0].irqFlag=1;
 
 		for( volatile int jj=0; jj<100000000; jj++);
 
@@ -191,7 +224,54 @@ void TF_TestCnt::Run( void )
 		//break;
 	}
 
-	cudaStreamSynchronize( streamMonitor );
+//	cudaStreamSynchronize( streamMonitor );
 
 
 }
+
+void TF_TestCnt::GetResult( void )
+{
+	GetResultBuffer( 0, &(td->ptrMonitor->block[0]) );
+	GetResultBuffer( 1, &(td->ptrMonitor->block[1]) );
+	GetResultBuffer( 2, &(td->ptrMonitor->block[2]) );
+
+}
+
+void TF_TestCnt::GetResultBuffer( int nbuf, TaskBufferStatus *ts )
+{
+
+	printf( "\nBuffer %d\n", nbuf );
+	printf( "block_rd=%d\n", ts->blockRd );
+	printf( "block_ok=%d\n", ts->blockOk );
+	printf( "block_error=%d\n", ts->blockError );
+
+	for( int ii=0; ii<TaskCounts; ii++ )
+	{
+		unsigned int cntError=ts->check[ii].cntError;
+		if( 0==cntError )
+		{
+			printf( "Task %d -Ok\n", ii );
+		} else
+		{
+			printf( "\nTask %d \n", ii );
+			printf( "   cntError=%d\n", cntError);
+			if( cntError>16 )
+				cntError=16;
+			for( int jj=0; jj<cntError; jj++ )
+			{
+			 printf( "%2d block: %4d  addr: 0x%.4X  receive: 0x%.8lX  expect: 0x%.8lX\n",
+					 jj,
+					 ts->check[ii].nblock[jj],
+					 ts->check[ii].adr[jj],
+					 ts->check[ii].receive_data[jj],
+					 ts->check[ii].expect_data[jj]
+			 	 );
+			}
+		}
+
+	}
+
+
+
+}
+

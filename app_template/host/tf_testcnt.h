@@ -17,6 +17,7 @@
 
 
 struct TaskData;
+struct TaskBufferStatus;
 
 /**
  *	\brief	Checking the transmission counter at CUDA device
@@ -51,6 +52,8 @@ public:
 
 	virtual void Run( void );
 
+	virtual void GetResult( void );
+
 	int	m_argc;
 	char** m_argv;
 
@@ -64,6 +67,7 @@ public:
 
     void FillCounter( CL_Cuda::BAR1_BUF *pBar1 );
 
+    void GetResultBuffer( int nbuf, TaskBufferStatus *ts );
 
 };
 

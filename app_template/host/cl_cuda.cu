@@ -187,6 +187,7 @@ void CL_Cuda::AllocateBar1Buffer( int sizeOfKb, BAR1_BUF *pAdr )
         throw(thLevel); // goto do_free_attr;
     }
     memset(state, 0, statesize);
+    state->handle = lock.handle;
     state->page_count = lock.page_count;
     res = ioctl(pd->fd, IOCTL_GPUMEM_STATE, state);
     if(res < 0) {
