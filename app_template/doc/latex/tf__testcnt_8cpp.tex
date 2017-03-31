@@ -1,0 +1,40 @@
+\hypertarget{tf__testcnt_8cpp}{
+\section{host/tf\_\-testcnt.cpp File Reference}
+\label{tf__testcnt_8cpp}\index{host/tf\_\-testcnt.cpp@{host/tf\_\-testcnt.cpp}}
+}
+{\ttfamily \#include $<$sys/types.h$>$}\par
+{\ttfamily \#include $<$sys/stat.h$>$}\par
+{\ttfamily \#include \char`\"{}stdio.h\char`\"{}}\par
+{\ttfamily \#include $<$unistd.h$>$}\par
+{\ttfamily \#include \char`\"{}tf\_\-testcnt.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cl\_\-cuda.h\char`\"{}}\par
+{\ttfamily \#include $<$cuda.h$>$}\par
+{\ttfamily \#include $<$cuda\_\-runtime\_\-api.h$>$}\par
+{\ttfamily \#include \char`\"{}task\_\-data.h\char`\"{}}\par
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{tf__testcnt_8cpp_ac9565e5590f3a246a043817906fc9965}{run\_\-checkCounter} (long $\ast$ptrMonitor, int nbuf, cudaStream\_\-t \&stream)
+\begin{DoxyCompactList}\small\item\em start checkCounterKernel \item\end{DoxyCompactList}\item 
+int \hyperlink{tf__testcnt_8cpp_a43e7c1996589a2d01ecfda60f5f7fb41}{run\_\-Monitor} (long $\ast$src, cudaStream\_\-t stream)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{tf__testcnt_8cpp_ac9565e5590f3a246a043817906fc9965}{
+\index{tf\_\-testcnt.cpp@{tf\_\-testcnt.cpp}!run\_\-checkCounter@{run\_\-checkCounter}}
+\index{run\_\-checkCounter@{run\_\-checkCounter}!tf_testcnt.cpp@{tf\_\-testcnt.cpp}}
+\subsubsection[{run\_\-checkCounter}]{\setlength{\rightskip}{0pt plus 5cm}int run\_\-checkCounter (long $\ast$ {\em ptrMonitor}, \/  int {\em nbuf}, \/  cudaStream\_\-t \& {\em stream})}}
+\label{tf__testcnt_8cpp_ac9565e5590f3a246a043817906fc9965}
+
+
+start checkCounterKernel 
+\begin{DoxyParams}{Parameters}
+\item[{\em ptrMonitor}]pointer in CUDA memory of shared data \item[{\em nbuf}]number of buffer \item[{\em stream}]CUDA stream for this kernel \end{DoxyParams}
+
+
+Definition at line 160 of file check\_\-counter.cu.\hypertarget{tf__testcnt_8cpp_a43e7c1996589a2d01ecfda60f5f7fb41}{
+\index{tf\_\-testcnt.cpp@{tf\_\-testcnt.cpp}!run\_\-Monitor@{run\_\-Monitor}}
+\index{run\_\-Monitor@{run\_\-Monitor}!tf_testcnt.cpp@{tf\_\-testcnt.cpp}}
+\subsubsection[{run\_\-Monitor}]{\setlength{\rightskip}{0pt plus 5cm}int run\_\-Monitor (long $\ast$ {\em src}, \/  cudaStream\_\-t {\em stream})}}
+\label{tf__testcnt_8cpp_a43e7c1996589a2d01ecfda60f5f7fb41}

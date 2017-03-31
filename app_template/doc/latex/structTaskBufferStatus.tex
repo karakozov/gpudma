@@ -1,0 +1,131 @@
+\hypertarget{structTaskBufferStatus}{
+\section{TaskBufferStatus Struct Reference}
+\label{structTaskBufferStatus}\index{TaskBufferStatus@{TaskBufferStatus}}
+}
+
+
+Struct for status calculate.  
+
+
+{\ttfamily \#include $<$task\_\-data.h$>$}\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \hyperlink{structTaskBufferStatus_ad2f11a4542658ad3fdec4eac2bcf8eeb}{irqFlag}
+\begin{DoxyCompactList}\small\item\em 1 -\/ ready data in bar1 buffer \item\end{DoxyCompactList}\item 
+unsigned int \hyperlink{structTaskBufferStatus_aac53804036a15457af35c1a4fa0595d2}{res0}
+\item 
+unsigned int \hyperlink{structTaskBufferStatus_a488df55e08dfb02be4d793186efef2f0}{res1}
+\item 
+unsigned int \hyperlink{structTaskBufferStatus_aa37878c4c19f5cfd5bbb010c3377bd94}{blockRd}
+\begin{DoxyCompactList}\small\item\em count of read buffer \item\end{DoxyCompactList}\item 
+unsigned int \hyperlink{structTaskBufferStatus_aabc9f698de646935e330356dab0736c9}{blockOk}
+\begin{DoxyCompactList}\small\item\em count of correct buffers \item\end{DoxyCompactList}\item 
+unsigned int \hyperlink{structTaskBufferStatus_a81844ea492b32a7e9d29dda117a3f935}{blockError}
+\begin{DoxyCompactList}\small\item\em count of buffer with errors \item\end{DoxyCompactList}\item 
+unsigned int \hyperlink{structTaskBufferStatus_ac09e520b4c35bddd83c61ab0a0d20e94}{sizeOfKBytes}
+\begin{DoxyCompactList}\small\item\em size of buffers in kilobytes \item\end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{structTaskBufferStatus_a530d1c73d828ba73216ab03fa67be5d4}{ptrCudaIn}
+\begin{DoxyCompactList}\small\item\em pointer on bar1 buffer in the Cuda memory \item\end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{structTaskBufferStatus_ac3996bd365a6296309bd372b227bbbdc}{ptrCudaOut}
+\begin{DoxyCompactList}\small\item\em pointer on output buffer in the Cuda memory \item\end{DoxyCompactList}\item 
+\hyperlink{structTaskCheckData}{TaskCheckData} \hyperlink{structTaskBufferStatus_ab95fe846215632d00858e3ed0fa4a293}{check} \mbox{[}\hyperlink{task__data_8h_a3c397e824761613a5e1d71e1b6d49b6d}{TaskCounts}\mbox{]}
+\begin{DoxyCompactList}\small\item\em current results for test one buffer \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Struct for status calculate. 
+
+Definition at line 40 of file task\_\-data.h.
+
+\subsection{Member Data Documentation}
+\hypertarget{structTaskBufferStatus_a81844ea492b32a7e9d29dda117a3f935}{
+\index{TaskBufferStatus@{TaskBufferStatus}!blockError@{blockError}}
+\index{blockError@{blockError}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{blockError}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::blockError}}}
+\label{structTaskBufferStatus_a81844ea492b32a7e9d29dda117a3f935}
+
+
+count of buffer with errors 
+
+Definition at line 47 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_aabc9f698de646935e330356dab0736c9}{
+\index{TaskBufferStatus@{TaskBufferStatus}!blockOk@{blockOk}}
+\index{blockOk@{blockOk}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{blockOk}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::blockOk}}}
+\label{structTaskBufferStatus_aabc9f698de646935e330356dab0736c9}
+
+
+count of correct buffers 
+
+Definition at line 46 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_aa37878c4c19f5cfd5bbb010c3377bd94}{
+\index{TaskBufferStatus@{TaskBufferStatus}!blockRd@{blockRd}}
+\index{blockRd@{blockRd}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{blockRd}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::blockRd}}}
+\label{structTaskBufferStatus_aa37878c4c19f5cfd5bbb010c3377bd94}
+
+
+count of read buffer 
+
+Definition at line 45 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_ab95fe846215632d00858e3ed0fa4a293}{
+\index{TaskBufferStatus@{TaskBufferStatus}!check@{check}}
+\index{check@{check}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{check}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TaskCheckData} {\bf TaskBufferStatus::check}\mbox{[}{\bf TaskCounts}\mbox{]}}}
+\label{structTaskBufferStatus_ab95fe846215632d00858e3ed0fa4a293}
+
+
+current results for test one buffer 
+
+Definition at line 53 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_ad2f11a4542658ad3fdec4eac2bcf8eeb}{
+\index{TaskBufferStatus@{TaskBufferStatus}!irqFlag@{irqFlag}}
+\index{irqFlag@{irqFlag}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{irqFlag}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::irqFlag}}}
+\label{structTaskBufferStatus_ad2f11a4542658ad3fdec4eac2bcf8eeb}
+
+
+1 -\/ ready data in bar1 buffer 
+
+Definition at line 42 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_a530d1c73d828ba73216ab03fa67be5d4}{
+\index{TaskBufferStatus@{TaskBufferStatus}!ptrCudaIn@{ptrCudaIn}}
+\index{ptrCudaIn@{ptrCudaIn}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{ptrCudaIn}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ {\bf TaskBufferStatus::ptrCudaIn}}}
+\label{structTaskBufferStatus_a530d1c73d828ba73216ab03fa67be5d4}
+
+
+pointer on bar1 buffer in the Cuda memory 
+
+Definition at line 50 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_ac3996bd365a6296309bd372b227bbbdc}{
+\index{TaskBufferStatus@{TaskBufferStatus}!ptrCudaOut@{ptrCudaOut}}
+\index{ptrCudaOut@{ptrCudaOut}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{ptrCudaOut}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ {\bf TaskBufferStatus::ptrCudaOut}}}
+\label{structTaskBufferStatus_ac3996bd365a6296309bd372b227bbbdc}
+
+
+pointer on output buffer in the Cuda memory 
+
+Definition at line 51 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_aac53804036a15457af35c1a4fa0595d2}{
+\index{TaskBufferStatus@{TaskBufferStatus}!res0@{res0}}
+\index{res0@{res0}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{res0}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::res0}}}
+\label{structTaskBufferStatus_aac53804036a15457af35c1a4fa0595d2}
+
+
+Definition at line 43 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_a488df55e08dfb02be4d793186efef2f0}{
+\index{TaskBufferStatus@{TaskBufferStatus}!res1@{res1}}
+\index{res1@{res1}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{res1}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::res1}}}
+\label{structTaskBufferStatus_a488df55e08dfb02be4d793186efef2f0}
+
+
+Definition at line 44 of file task\_\-data.h.\hypertarget{structTaskBufferStatus_ac09e520b4c35bddd83c61ab0a0d20e94}{
+\index{TaskBufferStatus@{TaskBufferStatus}!sizeOfKBytes@{sizeOfKBytes}}
+\index{sizeOfKBytes@{sizeOfKBytes}!TaskBufferStatus@{TaskBufferStatus}}
+\subsubsection[{sizeOfKBytes}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf TaskBufferStatus::sizeOfKBytes}}}
+\label{structTaskBufferStatus_ac09e520b4c35bddd83c61ab0a0d20e94}
+
+
+size of buffers in kilobytes 
+
+Definition at line 48 of file task\_\-data.h.
+
+The documentation for this struct was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+host/\hyperlink{task__data_8h}{task\_\-data.h}\end{DoxyCompactItemize}

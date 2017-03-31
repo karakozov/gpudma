@@ -2,12 +2,14 @@
  * TF_TestThread.cpp
  *
  *  Created on: Jan 29, 2017
- *      Author: root
+ *      Author: Dmitry Smekhov
  */
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "tf_testthread.h"
 
@@ -58,12 +60,6 @@ int 	TF_TestThread::Prepare( int cnt )
 		}
 
 		int ret=m_isPrepareComplete;
-		if( ret )
-		{
-			printf( "Prepare - Ok\n");
-			//fprintf( stderr, "Prepare - Ok\n");
-
-		}
 
 		return ret;
 }
@@ -88,7 +84,6 @@ void* TF_TestThread::Execute( void )
 		pthread_cond_wait( &m_StartCond, &m_StartMutex );
 		pthread_mutex_unlock( &m_StartMutex );
 
-		fprintf( stderr, "Run\n");
 		Run();
 
 		CleanupInThread();
@@ -117,6 +112,30 @@ int		TF_TestThread::isComplete( void )
 		return m_isComplete;
 }
 
-
+/**
+ * 	\brief 	get value from command line
+ *
+ * 	format command line:
+ * 	<name1> <value1> <name2> <value2>
+ *
+ * 	\param	argc		number of argument
+ * 	\param	argv		pointers to arguments
+ * 	\param	name		key of argument
+ * 	\parma	defValue	default value for arguments
+ *
+ * 	\return   value of argument or default value of argument
+ */
+int TF_TestThread::GetFromCommnadLine( int argc, char **argv, char* name, int defValue )
+{
+	int ret=defValue;
+	for( int ii=1; ii<argc-1; ii++ )
+	{
+		if( 0==strcmp( argv[ii], name) )
+		{
+			ret=atoi( argv[ii+1] );
+		}
+	}
+	return ret;
+}
 
 

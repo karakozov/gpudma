@@ -1,0 +1,261 @@
+\hypertarget{classTF__TestThread}{
+\section{TF\_\-TestThread Class Reference}
+\label{classTF__TestThread}\index{TF\_\-TestThread@{TF\_\-TestThread}}
+}
+
+
+Base class for application with thread.  
+
+
+{\ttfamily \#include $<$tf\_\-testthread.h$>$}Inheritance diagram for TF\_\-TestThread::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classTF__TestThread}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTF__TestThread_adc0b50667619b13b3791f96f8d9f3f9e}{TF\_\-TestThread} (int argc, char $\ast$$\ast$argv)
+\item 
+virtual \hyperlink{classTF__TestThread_a98193a8f032be71f6722230a528cb497}{$\sim$TF\_\-TestThread} ()
+\item 
+virtual int \hyperlink{classTF__TestThread_acfc9a31db91472deb811a47c1cf8e20f}{Prepare} (int cnt)
+\item 
+virtual void \hyperlink{classTF__TestThread_af7457803ef027ae030d7a98363b9e4b9}{Start} (void)
+\item 
+virtual void \hyperlink{classTF__TestThread_a3a633a8999b704e85bb197b5fdd63b43}{Stop} (void)
+\item 
+virtual int \hyperlink{classTF__TestThread_a323fe5eecb67f390ee0fada90ade5ed2}{isComplete} (void)
+\item 
+virtual void \hyperlink{classTF__TestThread_a25569ec704c682eed81abd63e05adf2a}{StepTable} (void)
+\item 
+void $\ast$ \hyperlink{classTF__TestThread_aac0ee4d59a3fa57e93ad2fa33644b377}{Execute} (void)
+\item 
+virtual void \hyperlink{classTF__TestThread_aebd5daf255a209019d018bc363021433}{PrepareInThread} (void)
+\item 
+virtual void \hyperlink{classTF__TestThread_a36cfb1a6da55b938b5634ac86adbae2f}{CleanupInThread} (void)
+\item 
+virtual void \hyperlink{classTF__TestThread_ab581c9fb725595dff5ffc400a96886a0}{Run} (void)
+\item 
+int \hyperlink{classTF__TestThread_a3cd8bd0134a8c180c885e7fb19cc9b3c}{GetFromCommnadLine} (int argc, char $\ast$$\ast$argv, char $\ast$name, int defValue)
+\begin{DoxyCompactList}\small\item\em get value from command line \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void $\ast$ \hyperlink{classTF__TestThread_a9ba6692148ce51f4bbfff8f408479c1f}{ThreadFunc} (void $\ast$lpvThreadParm)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classTF__TestThread_a5d92ac2f7010e79fb40326aa8980ddf3}{m\_\-isPrepareComplete}
+\item 
+int \hyperlink{classTF__TestThread_ab3f42e170b84b6b124fae56d403504c1}{m\_\-isComplete}
+\item 
+int \hyperlink{classTF__TestThread_ab7e24e3d4b9d6beb4a49d8845f5b2d9f}{m\_\-isTerminate}
+\item 
+int \hyperlink{classTF__TestThread_a796b7c7257792b3eabdb65b3e3d8d990}{m\_\-CycleCnt}
+\item 
+pthread\_\-mutex\_\-t \hyperlink{classTF__TestThread_a1ad6411cf734262c0d8e58a763c88cfb}{m\_\-StartMutex}
+\item 
+pthread\_\-cond\_\-t \hyperlink{classTF__TestThread_a45462e11e298f01d4868e084aa67be1c}{m\_\-StartCond}
+\item 
+pthread\_\-t \hyperlink{classTF__TestThread_a0c8b8d93ed2ae109221ea8da813ec389}{m\_\-hThread}
+\item 
+pthread\_\-attr\_\-t \hyperlink{classTF__TestThread_a111456494b43af46290cccae56efd170}{m\_\-attrThread}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Base class for application with thread. 
+
+Definition at line 21 of file tf\_\-testthread.h.
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classTF__TestThread_adc0b50667619b13b3791f96f8d9f3f9e}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!TF\_\-TestThread@{TF\_\-TestThread}}
+\index{TF\_\-TestThread@{TF\_\-TestThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{TF\_\-TestThread}]{\setlength{\rightskip}{0pt plus 5cm}TF\_\-TestThread::TF\_\-TestThread (int {\em argc}, \/  char $\ast$$\ast$ {\em argv})}}
+\label{classTF__TestThread_adc0b50667619b13b3791f96f8d9f3f9e}
+
+
+Definition at line 18 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_a98193a8f032be71f6722230a528cb497}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!$\sim$TF\_\-TestThread@{$\sim$TF\_\-TestThread}}
+\index{$\sim$TF\_\-TestThread@{$\sim$TF\_\-TestThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{$\sim$TF\_\-TestThread}]{\setlength{\rightskip}{0pt plus 5cm}TF\_\-TestThread::$\sim$TF\_\-TestThread ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTF__TestThread_a98193a8f032be71f6722230a528cb497}
+
+
+Definition at line 32 of file tf\_\-testthread.cpp.
+
+\subsection{Member Function Documentation}
+\hypertarget{classTF__TestThread_a36cfb1a6da55b938b5634ac86adbae2f}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!CleanupInThread@{CleanupInThread}}
+\index{CleanupInThread@{CleanupInThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{CleanupInThread}]{\setlength{\rightskip}{0pt plus 5cm}virtual void TF\_\-TestThread::CleanupInThread (void)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classTF__TestThread_a36cfb1a6da55b938b5634ac86adbae2f}
+
+
+Reimplemented in \hyperlink{classTF__TestCnt_a95c7a76a1fe574d1ed260a07f9469501}{TF\_\-TestCnt}.
+
+Definition at line 44 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_aac0ee4d59a3fa57e93ad2fa33644b377}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!Execute@{Execute}}
+\index{Execute@{Execute}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{Execute}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ TF\_\-TestThread::Execute (void)}}
+\label{classTF__TestThread_aac0ee4d59a3fa57e93ad2fa33644b377}
+
+
+Definition at line 77 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_a3cd8bd0134a8c180c885e7fb19cc9b3c}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!GetFromCommnadLine@{GetFromCommnadLine}}
+\index{GetFromCommnadLine@{GetFromCommnadLine}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{GetFromCommnadLine}]{\setlength{\rightskip}{0pt plus 5cm}int TF\_\-TestThread::GetFromCommnadLine (int {\em argc}, \/  char $\ast$$\ast$ {\em argv}, \/  char $\ast$ {\em name}, \/  int {\em defValue})}}
+\label{classTF__TestThread_a3cd8bd0134a8c180c885e7fb19cc9b3c}
+
+
+get value from command line format command line: $<$name1$>$ $<$value1$>$ $<$name2$>$ $<$value2$>$
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em argc}]number of argument \item[{\em argv}]pointers to arguments \item[{\em name}]key of argument  defValue default value for arguments\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+value of argument or default value of argument 
+\end{DoxyReturn}
+
+
+Definition at line 128 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_a323fe5eecb67f390ee0fada90ade5ed2}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!isComplete@{isComplete}}
+\index{isComplete@{isComplete}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{isComplete}]{\setlength{\rightskip}{0pt plus 5cm}int TF\_\-TestThread::isComplete (void)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTF__TestThread_a323fe5eecb67f390ee0fada90ade5ed2}
+
+
+Reimplemented from \hyperlink{classTF__Test_a14768dc0dba16b2cb7be89e8e7c2b3b0}{TF\_\-Test}.
+
+Definition at line 110 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_acfc9a31db91472deb811a47c1cf8e20f}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!Prepare@{Prepare}}
+\index{Prepare@{Prepare}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{Prepare}]{\setlength{\rightskip}{0pt plus 5cm}int TF\_\-TestThread::Prepare (int {\em cnt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTF__TestThread_acfc9a31db91472deb811a47c1cf8e20f}
+
+
+Implements \hyperlink{classTF__Test_a26630dcec87c80cd27ab33e3791fbe19}{TF\_\-Test}.
+
+Definition at line 39 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_aebd5daf255a209019d018bc363021433}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!PrepareInThread@{PrepareInThread}}
+\index{PrepareInThread@{PrepareInThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{PrepareInThread}]{\setlength{\rightskip}{0pt plus 5cm}virtual void TF\_\-TestThread::PrepareInThread (void)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classTF__TestThread_aebd5daf255a209019d018bc363021433}
+
+
+Reimplemented in \hyperlink{classTF__TestCnt_a294a67b58d75600172433b8fae006a3e}{TF\_\-TestCnt}.
+
+Definition at line 42 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_ab581c9fb725595dff5ffc400a96886a0}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!Run@{Run}}
+\index{Run@{Run}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{Run}]{\setlength{\rightskip}{0pt plus 5cm}virtual void TF\_\-TestThread::Run (void)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classTF__TestThread_ab581c9fb725595dff5ffc400a96886a0}
+
+
+Reimplemented in \hyperlink{classTF__TestCnt_aa7b667d47ddc70942ff2ff73074c7696}{TF\_\-TestCnt}.
+
+Definition at line 46 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_af7457803ef027ae030d7a98363b9e4b9}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!Start@{Start}}
+\index{Start@{Start}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{Start}]{\setlength{\rightskip}{0pt plus 5cm}void TF\_\-TestThread::Start (void)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTF__TestThread_af7457803ef027ae030d7a98363b9e4b9}
+
+
+Implements \hyperlink{classTF__Test_aab4a87d980709f2756d440771b4e24ac}{TF\_\-Test}.
+
+Definition at line 95 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_a25569ec704c682eed81abd63e05adf2a}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!StepTable@{StepTable}}
+\index{StepTable@{StepTable}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{StepTable}]{\setlength{\rightskip}{0pt plus 5cm}virtual void TF\_\-TestThread::StepTable (void)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classTF__TestThread_a25569ec704c682eed81abd63e05adf2a}
+
+
+Reimplemented from \hyperlink{classTF__Test_ac27a7742873ed7afab48b540fe3d9215}{TF\_\-Test}.
+
+Reimplemented in \hyperlink{classTF__TestCnt_ac1a136199115958172e96ef4c9212351}{TF\_\-TestCnt}.
+
+Definition at line 35 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a3a633a8999b704e85bb197b5fdd63b43}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!Stop@{Stop}}
+\index{Stop@{Stop}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{Stop}]{\setlength{\rightskip}{0pt plus 5cm}void TF\_\-TestThread::Stop (void)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTF__TestThread_a3a633a8999b704e85bb197b5fdd63b43}
+
+
+Reimplemented from \hyperlink{classTF__Test_a710a0463dee6767fcb3a3e3d191978b7}{TF\_\-Test}.
+
+Definition at line 104 of file tf\_\-testthread.cpp.\hypertarget{classTF__TestThread_a9ba6692148ce51f4bbfff8f408479c1f}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!ThreadFunc@{ThreadFunc}}
+\index{ThreadFunc@{ThreadFunc}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{ThreadFunc}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ TF\_\-TestThread::ThreadFunc (void $\ast$ {\em lpvThreadParm})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classTF__TestThread_a9ba6692148ce51f4bbfff8f408479c1f}
+
+
+Definition at line 67 of file tf\_\-testthread.cpp.
+
+\subsection{Member Data Documentation}
+\hypertarget{classTF__TestThread_a111456494b43af46290cccae56efd170}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-attrThread@{m\_\-attrThread}}
+\index{m\_\-attrThread@{m\_\-attrThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-attrThread}]{\setlength{\rightskip}{0pt plus 5cm}pthread\_\-attr\_\-t {\bf TF\_\-TestThread::m\_\-attrThread}}}
+\label{classTF__TestThread_a111456494b43af46290cccae56efd170}
+
+
+Definition at line 59 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a796b7c7257792b3eabdb65b3e3d8d990}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-CycleCnt@{m\_\-CycleCnt}}
+\index{m\_\-CycleCnt@{m\_\-CycleCnt}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-CycleCnt}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TF\_\-TestThread::m\_\-CycleCnt}}}
+\label{classTF__TestThread_a796b7c7257792b3eabdb65b3e3d8d990}
+
+
+Definition at line 53 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a0c8b8d93ed2ae109221ea8da813ec389}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-hThread@{m\_\-hThread}}
+\index{m\_\-hThread@{m\_\-hThread}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-hThread}]{\setlength{\rightskip}{0pt plus 5cm}pthread\_\-t {\bf TF\_\-TestThread::m\_\-hThread}}}
+\label{classTF__TestThread_a0c8b8d93ed2ae109221ea8da813ec389}
+
+
+Definition at line 58 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_ab3f42e170b84b6b124fae56d403504c1}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-isComplete@{m\_\-isComplete}}
+\index{m\_\-isComplete@{m\_\-isComplete}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-isComplete}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TF\_\-TestThread::m\_\-isComplete}}}
+\label{classTF__TestThread_ab3f42e170b84b6b124fae56d403504c1}
+
+
+Definition at line 50 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a5d92ac2f7010e79fb40326aa8980ddf3}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-isPrepareComplete@{m\_\-isPrepareComplete}}
+\index{m\_\-isPrepareComplete@{m\_\-isPrepareComplete}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-isPrepareComplete}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TF\_\-TestThread::m\_\-isPrepareComplete}}}
+\label{classTF__TestThread_a5d92ac2f7010e79fb40326aa8980ddf3}
+
+
+Definition at line 46 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_ab7e24e3d4b9d6beb4a49d8845f5b2d9f}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-isTerminate@{m\_\-isTerminate}}
+\index{m\_\-isTerminate@{m\_\-isTerminate}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-isTerminate}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TF\_\-TestThread::m\_\-isTerminate}}}
+\label{classTF__TestThread_ab7e24e3d4b9d6beb4a49d8845f5b2d9f}
+
+
+Definition at line 51 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a45462e11e298f01d4868e084aa67be1c}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-StartCond@{m\_\-StartCond}}
+\index{m\_\-StartCond@{m\_\-StartCond}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-StartCond}]{\setlength{\rightskip}{0pt plus 5cm}pthread\_\-cond\_\-t {\bf TF\_\-TestThread::m\_\-StartCond}}}
+\label{classTF__TestThread_a45462e11e298f01d4868e084aa67be1c}
+
+
+Definition at line 56 of file tf\_\-testthread.h.\hypertarget{classTF__TestThread_a1ad6411cf734262c0d8e58a763c88cfb}{
+\index{TF\_\-TestThread@{TF\_\-TestThread}!m\_\-StartMutex@{m\_\-StartMutex}}
+\index{m\_\-StartMutex@{m\_\-StartMutex}!TF_TestThread@{TF\_\-TestThread}}
+\subsubsection[{m\_\-StartMutex}]{\setlength{\rightskip}{0pt plus 5cm}pthread\_\-mutex\_\-t {\bf TF\_\-TestThread::m\_\-StartMutex}}}
+\label{classTF__TestThread_a1ad6411cf734262c0d8e58a763c88cfb}
+
+
+Definition at line 55 of file tf\_\-testthread.h.
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+host/\hyperlink{tf__testthread_8h}{tf\_\-testthread.h}\item 
+host/\hyperlink{tf__testthread_8cpp}{tf\_\-testthread.cpp}\end{DoxyCompactItemize}

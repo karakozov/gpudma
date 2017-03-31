@@ -2,7 +2,7 @@
 #include "cl_cuda.h"
 
 //! Number of task for check one buffer
-const int TaskCounts=16;
+const int TaskCounts=32;
 
 
 /**

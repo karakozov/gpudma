@@ -2,7 +2,7 @@
  * cl_cuda.cpp
  *
  *  Created on: Feb 4, 2017
- *      Author: user52
+ *      Author: Dmitry Smekhov
  */
 
 #include "cl_cuda.h"
@@ -205,7 +205,8 @@ void CL_Cuda::AllocateBar1Buffer( int sizeOfKb, BAR1_BUF *pAdr )
 
 
     for(unsigned ii=0; ii<state->page_count; ii++) {
-        fprintf(stderr, "%02d: 0x%lx\n", ii, state->pages[ii]);
+    	if( state->page_count<16 )
+         fprintf(stderr, "%02d: 0x%lx\n", ii, state->pages[ii]);
         void* va = mmap(0, state->page_size, PROT_READ|PROT_WRITE, MAP_SHARED, pd->fd, (off_t)state->pages[ii]);
         if(va == MAP_FAILED ) {
              fprintf(stderr, "%s(): %s\n", __FUNCTION__, strerror(errno));

@@ -1,0 +1,126 @@
+\hypertarget{structTaskData}{
+\section{TaskData Struct Reference}
+\label{structTaskData}\index{TaskData@{TaskData}}
+}
+
+
+collection data for \hyperlink{classTF__TestCnt}{TF\_\-TestCnt}  
+
+
+{\ttfamily \#include $<$task\_\-data.h$>$}\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structTaskData_a527fe3ca19e5dc328a58a8784ff0607d}{TaskData} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structTaskMonitor}{TaskMonitor} $\ast$ \hyperlink{structTaskData_a2e4a75b578879ae694ecca2a409f26ab}{ptrMonitor}
+\begin{DoxyCompactList}\small\item\em address monitor struct in the HOST memory \item\end{DoxyCompactList}\item 
+\hyperlink{structCL__Cuda_1_1BAR1__BUF}{CL\_\-Cuda::BAR1\_\-BUF} \hyperlink{structTaskData_a0d4636beee666900987f3ed81e096d09}{monitor}
+\begin{DoxyCompactList}\small\item\em description of monitor buffer in BAR1 \item\end{DoxyCompactList}\item 
+\hyperlink{structCL__Cuda_1_1BAR1__BUF}{CL\_\-Cuda::BAR1\_\-BUF} \hyperlink{structTaskData_ab7cbd8321c8573a90488c7d1fd843068}{bar1} \mbox{[}3\mbox{]}
+\begin{DoxyCompactList}\small\item\em description of buffer in BAR1 \item\end{DoxyCompactList}\item 
+uint64\_\-t \hyperlink{structTaskData_ab036e756a3cc0a6570d137a564fc3b85}{currentCounter}
+\begin{DoxyCompactList}\small\item\em Current value for fill buffers. \item\end{DoxyCompactList}\item 
+int \hyperlink{structTaskData_aa4e4e2414770aff4a16fcb5b0814ddeb}{cycleCnt}
+\item 
+int \hyperlink{structTaskData_a8981c450153c3f98283391622e26428d}{sizeBufferOfBytes}
+\begin{DoxyCompactList}\small\item\em Size of BAR1 buffer in bytes. \item\end{DoxyCompactList}\item 
+int \hyperlink{structTaskData_a07b21936ab1d6c2d9f5f69f0b3da4e69}{countOfBuffers}
+\begin{DoxyCompactList}\small\item\em Conunt of buffers, from 1 to 3. \item\end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{structTaskData_a9b8b05530ea3fea70aebedc097603982}{decimationBuffers} \mbox{[}3\mbox{]}
+\begin{DoxyCompactList}\small\item\em Buffer in the CUDA memory for. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+collection data for \hyperlink{classTF__TestCnt}{TF\_\-TestCnt} 
+
+Definition at line 75 of file task\_\-data.h.
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{structTaskData_a527fe3ca19e5dc328a58a8784ff0607d}{
+\index{TaskData@{TaskData}!TaskData@{TaskData}}
+\index{TaskData@{TaskData}!TaskData@{TaskData}}
+\subsubsection[{TaskData}]{\setlength{\rightskip}{0pt plus 5cm}TaskData::TaskData ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structTaskData_a527fe3ca19e5dc328a58a8784ff0607d}
+
+
+Definition at line 91 of file task\_\-data.h.
+
+\subsection{Member Data Documentation}
+\hypertarget{structTaskData_ab7cbd8321c8573a90488c7d1fd843068}{
+\index{TaskData@{TaskData}!bar1@{bar1}}
+\index{bar1@{bar1}!TaskData@{TaskData}}
+\subsubsection[{bar1}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CL\_\-Cuda::BAR1\_\-BUF} {\bf TaskData::bar1}\mbox{[}3\mbox{]}}}
+\label{structTaskData_ab7cbd8321c8573a90488c7d1fd843068}
+
+
+description of buffer in BAR1 
+
+Definition at line 79 of file task\_\-data.h.\hypertarget{structTaskData_a07b21936ab1d6c2d9f5f69f0b3da4e69}{
+\index{TaskData@{TaskData}!countOfBuffers@{countOfBuffers}}
+\index{countOfBuffers@{countOfBuffers}!TaskData@{TaskData}}
+\subsubsection[{countOfBuffers}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TaskData::countOfBuffers}}}
+\label{structTaskData_a07b21936ab1d6c2d9f5f69f0b3da4e69}
+
+
+Conunt of buffers, from 1 to 3. 
+
+Definition at line 86 of file task\_\-data.h.\hypertarget{structTaskData_ab036e756a3cc0a6570d137a564fc3b85}{
+\index{TaskData@{TaskData}!currentCounter@{currentCounter}}
+\index{currentCounter@{currentCounter}!TaskData@{TaskData}}
+\subsubsection[{currentCounter}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf TaskData::currentCounter}}}
+\label{structTaskData_ab036e756a3cc0a6570d137a564fc3b85}
+
+
+Current value for fill buffers. 
+
+Definition at line 81 of file task\_\-data.h.\hypertarget{structTaskData_aa4e4e2414770aff4a16fcb5b0814ddeb}{
+\index{TaskData@{TaskData}!cycleCnt@{cycleCnt}}
+\index{cycleCnt@{cycleCnt}!TaskData@{TaskData}}
+\subsubsection[{cycleCnt}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TaskData::cycleCnt}}}
+\label{structTaskData_aa4e4e2414770aff4a16fcb5b0814ddeb}
+
+
+Definition at line 83 of file task\_\-data.h.\hypertarget{structTaskData_a9b8b05530ea3fea70aebedc097603982}{
+\index{TaskData@{TaskData}!decimationBuffers@{decimationBuffers}}
+\index{decimationBuffers@{decimationBuffers}!TaskData@{TaskData}}
+\subsubsection[{decimationBuffers}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ {\bf TaskData::decimationBuffers}\mbox{[}3\mbox{]}}}
+\label{structTaskData_a9b8b05530ea3fea70aebedc097603982}
+
+
+Buffer in the CUDA memory for. 
+
+Definition at line 88 of file task\_\-data.h.\hypertarget{structTaskData_a0d4636beee666900987f3ed81e096d09}{
+\index{TaskData@{TaskData}!monitor@{monitor}}
+\index{monitor@{monitor}!TaskData@{TaskData}}
+\subsubsection[{monitor}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CL\_\-Cuda::BAR1\_\-BUF} {\bf TaskData::monitor}}}
+\label{structTaskData_a0d4636beee666900987f3ed81e096d09}
+
+
+description of monitor buffer in BAR1 
+
+Definition at line 78 of file task\_\-data.h.\hypertarget{structTaskData_a2e4a75b578879ae694ecca2a409f26ab}{
+\index{TaskData@{TaskData}!ptrMonitor@{ptrMonitor}}
+\index{ptrMonitor@{ptrMonitor}!TaskData@{TaskData}}
+\subsubsection[{ptrMonitor}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TaskMonitor}$\ast$ {\bf TaskData::ptrMonitor}}}
+\label{structTaskData_a2e4a75b578879ae694ecca2a409f26ab}
+
+
+address monitor struct in the HOST memory 
+
+Definition at line 77 of file task\_\-data.h.\hypertarget{structTaskData_a8981c450153c3f98283391622e26428d}{
+\index{TaskData@{TaskData}!sizeBufferOfBytes@{sizeBufferOfBytes}}
+\index{sizeBufferOfBytes@{sizeBufferOfBytes}!TaskData@{TaskData}}
+\subsubsection[{sizeBufferOfBytes}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TaskData::sizeBufferOfBytes}}}
+\label{structTaskData_a8981c450153c3f98283391622e26428d}
+
+
+Size of BAR1 buffer in bytes. 
+
+Definition at line 85 of file task\_\-data.h.
+
+The documentation for this struct was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+host/\hyperlink{task__data_8h}{task\_\-data.h}\end{DoxyCompactItemize}

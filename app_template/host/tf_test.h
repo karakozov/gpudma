@@ -2,7 +2,7 @@
  * tf_test.h
  *
  *  Created on: Jan 29, 2017
- *      Author: root
+ *      Author: Dmitry Smekhov
  */
 
 #ifndef TF_TEST_H_

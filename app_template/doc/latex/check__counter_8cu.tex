@@ -1,0 +1,45 @@
+\hypertarget{check__counter_8cu}{
+\section{cuda/check\_\-counter.cu File Reference}
+\label{check__counter_8cu}\index{cuda/check\_\-counter.cu@{cuda/check\_\-counter.cu}}
+}
+{\ttfamily \#include $<$stdio.h$>$}\par
+{\ttfamily \#include $<$assert.h$>$}\par
+{\ttfamily \#include $<$cuda\_\-runtime.h$>$}\par
+{\ttfamily \#include $<$helper\_\-functions.h$>$}\par
+{\ttfamily \#include $<$helper\_\-cuda.h$>$}\par
+{\ttfamily \#include \char`\"{}task\_\-data.h\char`\"{}}\par
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\_\-\_\-global\_\-\_\- void \hyperlink{check__counter_8cu_a3ae4bf3f0cbc22f9b180089ff143dd1d}{checkCounterKernel} (long $\ast$sharedMemory, int nbuf)
+\begin{DoxyCompactList}\small\item\em CUDA kernel for check buffer. \item\end{DoxyCompactList}\item 
+int \hyperlink{check__counter_8cu_ac9565e5590f3a246a043817906fc9965}{run\_\-checkCounter} (long $\ast$ptrMonitor, int nbuf, cudaStream\_\-t \&stream)
+\begin{DoxyCompactList}\small\item\em start checkCounterKernel \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{check__counter_8cu_a3ae4bf3f0cbc22f9b180089ff143dd1d}{
+\index{check\_\-counter.cu@{check\_\-counter.cu}!checkCounterKernel@{checkCounterKernel}}
+\index{checkCounterKernel@{checkCounterKernel}!check_counter.cu@{check\_\-counter.cu}}
+\subsubsection[{checkCounterKernel}]{\setlength{\rightskip}{0pt plus 5cm}\_\-\_\-global\_\-\_\- void checkCounterKernel (long $\ast$ {\em sharedMemory}, \/  int {\em nbuf})}}
+\label{check__counter_8cu_a3ae4bf3f0cbc22f9b180089ff143dd1d}
+
+
+CUDA kernel for check buffer. 
+\begin{DoxyParams}{Parameters}
+\item[{\em sharedMemory}]area for exchange status information with host \item[{\em nbuf}]number of buffer \end{DoxyParams}
+
+
+Definition at line 36 of file check\_\-counter.cu.\hypertarget{check__counter_8cu_ac9565e5590f3a246a043817906fc9965}{
+\index{check\_\-counter.cu@{check\_\-counter.cu}!run\_\-checkCounter@{run\_\-checkCounter}}
+\index{run\_\-checkCounter@{run\_\-checkCounter}!check_counter.cu@{check\_\-counter.cu}}
+\subsubsection[{run\_\-checkCounter}]{\setlength{\rightskip}{0pt plus 5cm}int run\_\-checkCounter (long $\ast$ {\em ptrMonitor}, \/  int {\em nbuf}, \/  cudaStream\_\-t \& {\em stream})}}
+\label{check__counter_8cu_ac9565e5590f3a246a043817906fc9965}
+
+
+start checkCounterKernel 
+\begin{DoxyParams}{Parameters}
+\item[{\em ptrMonitor}]pointer in CUDA memory of shared data \item[{\em nbuf}]number of buffer \item[{\em stream}]CUDA stream for this kernel \end{DoxyParams}
+
+
+Definition at line 160 of file check\_\-counter.cu.

@@ -13,7 +13,7 @@
 // System includes
 #include <stdio.h>
 #include <signal.h>
-
+#include <unistd.h>
 
 #include <assert.h>
 
@@ -63,6 +63,9 @@ int main(int argc, char **argv)
 			}
 
 			pTest->StepTable();
+
+			usleep( 10000 ); // 100 ms
+
 		}
 
 		//pTest->GetResult();

@@ -2,7 +2,7 @@
  * TF_TestThread.h
  *
  *  Created on: Jan 29, 2017
- *      Author: root
+ *      Author: Dmitry Smekhov
  */
 
 #ifndef TF_TestThread_H_
@@ -58,6 +58,7 @@ public:
     pthread_t 			m_hThread;
     pthread_attr_t  	m_attrThread;
 
+    int GetFromCommnadLine( int argc, char **argv, char* name, int defValue );
 
 };
 

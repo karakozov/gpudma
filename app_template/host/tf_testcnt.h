@@ -2,7 +2,7 @@
  * TF_TestCnt.h
  *
  *  Created on: Jan 29, 2017
- *      Author: root
+ *      Author: Dmitry Smekhov
  */
 
 #ifndef TF_TESTCNT_H_
@@ -44,7 +44,7 @@ public:
 	virtual ~TF_TestCnt();
 
 
-	virtual void	StepTable( void );
+	virtual void StepTable( void );
 
 	virtual void PrepareInThread( void );
 
@@ -54,20 +54,28 @@ public:
 
 	virtual void GetResult( void );
 
+	//! Number of arguments
 	int	m_argc;
+
+	//! Pointers to arguments
 	char** m_argv;
 
 
+	int m_SizeBufferOfKb;	//!< Size buffer [kbytes]. Must be n*64
 
+	int m_CountOfCycle;		//!< Number of cycle. 0 - infinitely
 
 
 	struct TaskData		*td;		//!< Local data for test
 
     CL_Cuda				*m_pCuda;	//!< Cuda device
 
+
+    //! Fill buffer in Cuda memory via BAR1
     void FillCounter( CL_Cuda::BAR1_BUF *pBar1 );
 
-    void GetResultBuffer( int nbuf, TaskBufferStatus *ts );
+    //! Print results for buffer
+    void GetResultBuffer( int nbuf );
 
 };
 

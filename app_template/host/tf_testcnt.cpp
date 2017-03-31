@@ -2,12 +2,14 @@
  * TF_TestCnt.cpp
  *
  *  Created on: Jan 29, 2017
- *      Author: root
+ *      Author: Dmitry Smekhov
  */
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "stdio.h"
+
+#include <unistd.h>
 
 #include "tf_testcnt.h"
 #include "cl_cuda.h"
@@ -16,15 +18,18 @@
 
 #include "task_data.h"
 
-int init_cuda(int argc, char **argv);
-int run_cuda( void );
 
 
 
 
 TF_TestCnt::TF_TestCnt( int argc, char **argv ) : TF_TestThread( argc, argv )
 {
-	// TODO Auto-generated constructor stub
+
+
+	m_CountOfCycle   = GetFromCommnadLine( argc, argv, "-count", 16 );
+	m_SizeBufferOfKb = GetFromCommnadLine( argc, argv, "-size", 256);
+
+
 
 	td = new TaskData;
 
@@ -43,21 +48,42 @@ TF_TestCnt::~TF_TestCnt() {
 }
 
 
-
+/**
+ * 		\brief	Display current information about cheking buffers
+ *
+ * 		Function display information if 0==m_CountOfCycle
+ * 		function is called from main with interval of 100 ms
+ */
 void	TF_TestCnt::StepTable( void )
 {
 
-	unsigned blockRd = td->ptrMonitor->block[0].blockRd;
-	//printf( "  %10d \r", blockRd );
 
-	//m_CycleCnt++;
-	//printf( "  %10d \r", m_CycleCnt );
-	//Stop();
+	if( 0!=m_CountOfCycle )
+		return;
+
+	unsigned blockRd=0;
+	unsigned blockOk=0;
+	unsigned blockError=0;
+
+	for( int ii=0; ii<3; ii++ )
+	{
+		blockRd+=td->ptrMonitor->block[ii].blockRd;
+		blockOk+=td->ptrMonitor->block[ii].blockOk;
+		blockError+=td->ptrMonitor->block[ii].blockError;
+
+	}
+
+	printf( "  %10d  %10d   %10d \r", blockRd, blockOk, blockError );
 }
 
+/**
+ * 		\brief	Prepare CUDA and buffers
+ *
+ * 		Open CUDA device
+ * 		Allocate three buffers and buffer for monitor
+ */
 void TF_TestCnt::PrepareInThread( void )
 {
-	//init_cuda( m_argc, m_argv );
 
 	m_pCuda = new CL_Cuda( m_argc, m_argv );
 
@@ -65,7 +91,7 @@ void TF_TestCnt::PrepareInThread( void )
 
 
 	td->countOfBuffers=3;
-	int size=256;
+	int size=m_SizeBufferOfKb;
 	td->sizeBufferOfBytes=size*1024;
 
 
@@ -84,15 +110,34 @@ void TF_TestCnt::PrepareInThread( void )
 		td->ptrMonitor->block[ii].ptrCudaIn=(void*)(td->bar1[ii].cuda_addr);
 
 		td->ptrMonitor->block[ii].sizeOfKBytes=size;
+
+		td->ptrMonitor->block[ii].irqFlag=0;
+		td->ptrMonitor->block[ii].blockOk=0;
+		td->ptrMonitor->block[ii].blockError=0;
+		td->ptrMonitor->block[ii].blockRd=0;
+		for( int jj=0; jj<TaskCounts; jj++ )
+		{
+		 td->ptrMonitor->block[ii].check[jj].cntError=0;
+		 td->ptrMonitor->block[ii].check[jj].flagError=0;
+		}
 	}
 
 	td->ptrMonitor->flagExit=0;
 	td->ptrMonitor->sig=0xAA24;
 
 
-	fprintf( stderr, "%s - Ok\n", __FUNCTION__ );
+	printf( "m_CountOfCycle=%d\n", m_CountOfCycle );
+	printf( "m_SizeBufferOfKb=%d [kB]\n\n", m_SizeBufferOfKb );
+
+	if( 0==m_CountOfCycle )
+		printf( "\n    BLOCK_RD    BLOCK_OK     BLOCK_ERROR \n" );
+
 }
 
+/**
+ * 		\brief		Free buffers and close device
+ *
+ */
 void TF_TestCnt::CleanupInThread( void )
 {
 
@@ -148,19 +193,8 @@ int run_Monitor( long* src, cudaStream_t stream );
 void TF_TestCnt::Run( void )
 {
 
-//	long *device_dst;
 	size_t size=256*1024;
-//	cudaMalloc( (void**)(&device_dst), size );
-//	fprintf( stderr, "sizeof(long)=%d\n", sizeof(long));
-//
-	long *device_src=(long*)(td->bar1[0].cuda_addr);
-	long *device_dst=(long*)(td->bar1[1].cuda_addr);
-//
-//	long *host_dst =(long*)malloc(size);
 
-	FillCounter( &td->bar1[0]);
-	FillCounter( &td->bar1[1]);
-	FillCounter( &td->bar1[2]);
 
 	long *ptrCudaMonitor=(long*)(td->monitor.cuda_addr);
 
@@ -177,10 +211,65 @@ void TF_TestCnt::Run( void )
 	run_checkCounter(  ptrCudaMonitor, 1, streamBuf1 );
 	run_checkCounter(  ptrCudaMonitor, 2, streamBuf2 );
 
+
+	int val;
+
+	for( int kk=0; ; kk++ )
+	{
+
+
+		if( m_isTerminate || (m_CountOfCycle>0 && m_CountOfCycle==kk ))
+		{
+			td->ptrMonitor->flagExit=1;
+			break;
+		}
+
+//		Check for checkCounter finished checking buffer 0
+//		for( ; ; )
+//		{
+//		  val = td->ptrMonitor->block[0].irqFlag;
+//		  if( 0==val )
+//			  break;
+//		}
+		FillCounter( &td->bar1[0]);
+		td->ptrMonitor->block[0].irqFlag=1;
+
+		usleep( 100 );
+
+//		Check for checkCounter finished checking buffer 1
+//		for( ; ; )
+//		{
+//		  val = td->ptrMonitor->block[1].irqFlag;
+//		  if( 0==val )
+//			  break;
+//		}
+		FillCounter( &td->bar1[1]);
+		td->ptrMonitor->block[1].irqFlag=1;
+
+		usleep( 100 );
+
+//		Check for checkCounter finished checking buffer 2
+//		for( ; ; )
+//		{
+//		  val = td->ptrMonitor->block[2].irqFlag;
+//		  if( 0==val )
+//			  break;
+//		}
+		FillCounter( &td->bar1[2]);
+		td->ptrMonitor->block[2].irqFlag=1;
+
+		usleep( 100 );
+
+	}
+
+	for( volatile int jj=0; jj<100000000; jj++);
+
+	td->ptrMonitor->flagExit=1;
+
+
 	cudaStreamSynchronize( streamBuf0 );
 	cudaStreamSynchronize( streamBuf1 );
 	cudaStreamSynchronize( streamBuf2 );
-
 
 
 	GetResult();
@@ -188,87 +277,79 @@ void TF_TestCnt::Run( void )
 	return;
 
 
-	cudaStream_t	streamMonitor;
-	cudaStreamCreate( &streamMonitor );
-//	run_Monitor( ptrCudaMonitor, streamMonitor );
-
-
-
-
-	for( ; ; )
-	{
-		if( m_isTerminate )
-		{
-			td->ptrMonitor->flagExit=1;
-			break;
-		}
-
-		td->ptrMonitor->block[0].irqFlag=1;
-
-		for( volatile int jj=0; jj<100000000; jj++);
-
-//		FillCounter( &td->m_Bar1[0]);
-//		run_checkCounter( device_src, device_dst, size );
-//
-//    	cudaMemcpy(host_dst, device_dst, size, cudaMemcpyDeviceToHost);
-//    	cudaDeviceSynchronize();
-//
-//    	for( int ii; ii<16; ii++ )
-//    	{
-//    		fprintf( stderr, " 0x%.8X\n", host_dst[ii]);
-//    	}
-//		m_CycleCnt++;
-
-
-		//td->ptrMonitor->flagExit=1;
-		//break;
-	}
-
-//	cudaStreamSynchronize( streamMonitor );
-
 
 }
 
+/**
+ * 		\brief	Display result for all buffers
+ *
+ */
 void TF_TestCnt::GetResult( void )
 {
-	GetResultBuffer( 0, &(td->ptrMonitor->block[0]) );
-	GetResultBuffer( 1, &(td->ptrMonitor->block[1]) );
-	GetResultBuffer( 2, &(td->ptrMonitor->block[2]) );
+	GetResultBuffer( 0 );
+	GetResultBuffer( 1 );
+	GetResultBuffer( 2 );
 
 }
 
-void TF_TestCnt::GetResultBuffer( int nbuf, TaskBufferStatus *ts )
+/**
+ * 		\brief	Display result for one buffers
+ *
+ * 		\param	nbuf	number of buffer
+ *
+ */
+void TF_TestCnt::GetResultBuffer( int nbuf )
 {
 
+	TaskBufferStatus *ts=&(td->ptrMonitor->block[nbuf]);
 	printf( "\nBuffer %d\n", nbuf );
 	printf( "block_rd=%d\n", ts->blockRd );
 	printf( "block_ok=%d\n", ts->blockOk );
 	printf( "block_error=%d\n", ts->blockError );
 
-	for( int ii=0; ii<TaskCounts; ii++ )
+	int flag_ok=1;
+	for( int ii=0; ii<TaskCounts;ii++)
 	{
-		unsigned int cntError=ts->check[ii].cntError;
-		if( 0==cntError )
+		if( 0!=ts->check[ii].cntError )
 		{
-			printf( "Task %d -Ok\n", ii );
-		} else
-		{
-			printf( "\nTask %d \n", ii );
-			printf( "   cntError=%d\n", cntError);
-			if( cntError>16 )
-				cntError=16;
-			for( int jj=0; jj<cntError; jj++ )
-			{
-			 printf( "%2d block: %4d  addr: 0x%.4X  receive: 0x%.8lX  expect: 0x%.8lX\n",
-					 jj,
-					 ts->check[ii].nblock[jj],
-					 ts->check[ii].adr[jj],
-					 ts->check[ii].receive_data[jj],
-					 ts->check[ii].expect_data[jj]
-			 	 );
-			}
+			flag_ok=0;
+			break;
 		}
+	}
 
+	if( 1==flag_ok )
+	{
+		printf( "Task 0:%d  - Ok\n",  TaskCounts-1 );
+
+	} else
+	{
+
+
+		for( int ii=0; ii<TaskCounts; ii++ )
+		{
+			unsigned int cntError=ts->check[ii].cntError;
+			if( 0==cntError )
+			{
+				printf( "Task %d -Ok\n", ii );
+			} else
+			{
+				printf( "\nTask %d \n", ii );
+				printf( "   cntError=%d\n", cntError);
+				if( cntError>16 )
+					cntError=16;
+				for( int jj=0; jj<cntError; jj++ )
+				{
+				 printf( "%2d block: %4d  addr: 0x%.4X  receive: 0x%.8lX  expect: 0x%.8lX\n",
+						 jj,
+						 ts->check[ii].nblock[jj],
+						 ts->check[ii].adr[jj],
+						 ts->check[ii].receive_data[jj],
+						 ts->check[ii].expect_data[jj]
+					 );
+				}
+			}
+
+		}
 	}
 
 
