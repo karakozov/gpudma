@@ -2,7 +2,7 @@
  * cl_cuda.h
  *
  *  Created on: Feb 4, 2017
- *      Author: user52
+ *      Author: Dmitry Smekhov
  */
 
 #ifndef CL_CUDA_H_
