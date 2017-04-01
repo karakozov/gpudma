@@ -34,6 +34,8 @@ struct TaskCheckData
 
 };
 
+struct TaskHostStatus;
+
 /**
  * 	\brief	Struct for status calculate
  */
@@ -50,6 +52,8 @@ struct TaskBufferStatus
 	void*	ptrCudaIn;			//!< pointer on bar1 buffer in the Cuda memory
 
 	void*	ptrCudaOut;			//!< pointer on output buffer in the Cuda memory
+
+	TaskHostStatus	*ptrHostStatus;		//!< pointer on TaskHostStatus in the Host memory
 
 	unsigned int	indexWr;	//!< block number for next write
 	unsigned int	indexRd;	//!< block number for read
@@ -128,13 +132,39 @@ struct TaskData
 
 	TaskHostMonitor* hostMonitor;	//!< monitor data in the host memory
 
+	unsigned int hostBlockRd;		//!< count blocks which host received
+	unsigned int hostBlockOk;		//!< block without errors
+	unsigned int hostBlockError;	//!< block with errors;
 
+	uint64_t	hostExpectData;		//!< expect data for checking
+
+	TaskCheckData	hostCheck;		//!< result of checking host data
+
+	double velosityExtToCudaCurrent;	//!< velosity data transfer from external device to Cuda for last 4 sec
+	double velosityExtToCudaAvr;	    //!< velosity data transfer from external device to Cuda from start
+
+	double velosityCudaToHostCurrent;	//!< velosity data transfer from external device to Cuda for last 4 sec
+	double velosityCudaToHostAvr;	    //!< velosity data transfer from external device to Cuda from start
 
 	TaskData()
 	{
 		cycleCnt=0;
 		sizeBufferOfBytes=0;
-		countOfBuffers=0;
+		countOfBuffers=3;
 		currentCounter=0;
+
+		hostBuffer=NULL;
+		hostMonitor=NULL;
+
+		hostBlockRd=0;
+		hostBlockOk=0;
+		hostBlockError=0;
+		hostExpectData=0;
+
+		velosityExtToCudaCurrent=0;
+		velosityExtToCudaAvr=0;
+		velosityCudaToHostCurrent=0;
+		velosityCudaToHostAvr=0;
+
 	}
 };

@@ -17,21 +17,23 @@
 #include <cuda_runtime_api.h>
 
 #include "task_data.h"
+#include <time.h>
 
-
-
-
+double getTime( void )
+{
+	clock_t t=clock();
+	double ret= t / (double)CLOCKS_PER_SEC;
+	return ret;
+}
 
 TF_TestCnt::TF_TestCnt( int argc, char **argv ) : TF_TestThread( argc, argv )
 {
 
 
+	td = new TaskData;
+
 	td->countOfCycle   = GetFromCommnadLine( argc, argv, "-count", 16 );
 	td->sizeBufferOfKb = GetFromCommnadLine( argc, argv, "-size", 256);
-
-
-
-	td = new TaskData;
 
 
 	m_pCuda=NULL;
@@ -73,7 +75,19 @@ void	TF_TestCnt::StepTable( void )
 
 	}
 
-	printf( "  %10d  %10d   %10d \r", blockRd, blockOk, blockError );
+	printf( " %7d %7d %8d %7d %7d %8d %7.1lf %7.1lf %7.1lf %7.1lf\r", blockRd, blockOk, blockError,
+			td->hostBlockRd,
+			//td->ptrMonitor->block[0].indexWr, td->hostMonitor->status[0].indexRd
+			td->hostBlockOk,
+			td->hostBlockError,
+			td->velosityExtToCudaCurrent,
+			td->velosityExtToCudaAvr,
+			td->velosityCudaToHostCurrent,
+			td->velosityCudaToHostAvr
+
+			//td->hostMonitor->status[0].indexWr,
+			//td->hostMonitor->status[0].indexRd
+			);
 }
 
 /**
@@ -105,7 +119,7 @@ void TF_TestCnt::PrepareInThread( void )
 
 	td->ptrMonitor=(TaskMonitor*)td->monitor.app_addr[0];
 
-	unsigned int indexMax=2;
+
 	size_t outSizeBlock=size*1024/TaskCounts; // size of output buffer
 	int n=512*1024*1024 / outSizeBlock; // count blocks in 512 MB buffer
 
@@ -117,15 +131,17 @@ void TF_TestCnt::PrepareInThread( void )
 
 	cudaError_t ret;
 
-	void *ptr=(void*)td->hostBuffer;
+	void *ptr=NULL;
 	ret=cudaMallocHost( &ptr, outSizeBlock );
 	if( cudaSuccess!=ret )
 		throw( "Error page-locked memory allocate for hostBuffer" );
+	td->hostBuffer=(uint64_t*)ptr;
 
-	ptr=(void*)td->hostMonitor;
+	ptr=NULL;
 	ret=cudaMallocHost( &ptr, 4096 );
 	if( cudaSuccess!=ret )
 		throw( "Error page-locked memory allocate for hostMonitor" );
+	td->hostMonitor=(TaskHostMonitor*)ptr;
 
 
 	for( int ii=0; ii<td->countOfBuffers; ii++ )
@@ -147,10 +163,15 @@ void TF_TestCnt::PrepareInThread( void )
 		 td->ptrMonitor->block[ii].indexRd=0;
 		 td->ptrMonitor->block[ii].indexWr=0;
 
-		 td->ptrMonitor->block[ii].indexMax = indexMax;
-		 ret= cudaMalloc( &(td->ptrMonitor->block[ii].ptrCudaOut), outSizeBuffer );
+		 td->ptrMonitor->block[ii].indexMax = td->outputCountBlock;
+		 ptr=NULL;
+		 ret= cudaMalloc( &ptr, outSizeBuffer );
 		 if( cudaSuccess != ret )
 			 throw( "Error memory allocation for output buffer" );
+		 td->ptrMonitor->block[ii].ptrCudaOut=ptr;
+
+		 td->ptrMonitor->block[ii].ptrHostStatus=&td->hostMonitor->status[ii];
+
 
 	}
 
@@ -162,7 +183,7 @@ void TF_TestCnt::PrepareInThread( void )
 	printf( "td->sizeBufferOfKb=%d [kB]\n\n", td->sizeBufferOfKb );
 
 	if( 0==td->countOfCycle )
-		printf( "\n    BLOCK_RD    BLOCK_OK     BLOCK_ERROR \n" );
+		printf( "\n CUDA_RD CUDA_OK CUDA_ERR HOST_RD HOST_OK HOST_ERR E2C_CUR E2C_AVR C2H_CUR C2H_AVR \n" );
 
 }
 
@@ -236,13 +257,13 @@ void TF_TestCnt::Run( void )
 	cudaStream_t	streamBuf0;
 	cudaStream_t	streamBuf1;
 	cudaStream_t	streamBuf2;
-	cudaStream_t	streamMonitor;
+	//cudaStream_t	streamMonitor;
 	cudaStream_t	streamDMA;
 
 	cudaStreamCreate( &streamBuf0 );
 	cudaStreamCreate( &streamBuf1 );
 	cudaStreamCreate( &streamBuf2 );
-	cudaStreamCreate( &streamMonitor );
+	//cudaStreamCreate( &streamMonitor );
 	cudaStreamCreate( &streamDMA );
 
 
@@ -255,17 +276,59 @@ void TF_TestCnt::Run( void )
 	int blockRd;
 
 	int nbuf;
-	unsigned int indexRd[3]={ 0, 0, 0 };
+	//unsigned int indexRd[3]={ 0, 0, 0 };
+	td->hostMonitor->status[0].indexRd=0;
+	td->hostMonitor->status[1].indexRd=0;
+	td->hostMonitor->status[2].indexRd=0;
 
 	cudaError_t ret;
 
-	int status=0;
+	int status=1;
 
+	volatile unsigned int index_wr;
+	unsigned int index_rd;
+
+	double time_start = getTime();
+	double time_last=time_start;
+	double time_current;
+	double velosity;
+
+	unsigned int blockRdLast=0;
+	unsigned int blockHostRdLast=0;
 
 	for( int kk=0; ; kk++ )
 	{
 
-		blockRd=td->ptrMonitor->block[0].blockRd;
+
+		time_current=getTime();
+		if( time_current-time_last>4 )
+		{
+			blockRd=td->ptrMonitor->block[0].blockRd + td->ptrMonitor->block[1].blockRd + td->ptrMonitor->block[2].blockRd;
+
+			velosity = (double)1.0*td->sizeBufferOfKb*1024*(blockRd-blockRdLast)/(time_current-time_last);
+			td->velosityExtToCudaCurrent=velosity/1024/1024;
+
+			velosity = (double)1.0*td->sizeBufferOfKb*blockRd;
+			velosity/=(time_current-time_start);
+			td->velosityExtToCudaAvr=velosity/1024;
+
+			blockRdLast=blockRd;
+
+
+			blockRd = td->hostBlockRd;
+			velosity = (double)1.0*td->outputSizeBlock*(blockRd-blockHostRdLast)/(time_current-time_last);
+			td->velosityCudaToHostCurrent=velosity/1024/1024;
+
+			velosity = (double)1.0*td->outputSizeBlock*blockRd;
+			velosity/=(time_current-time_start);
+			td->velosityCudaToHostAvr=velosity/1024/1024;
+
+
+			time_last=time_current;
+			blockHostRdLast=blockRd;
+
+		}
+
 
 		if( m_isTerminate || (td->countOfCycle>0 && td->countOfCycle==blockRd ))
 		{
@@ -275,45 +338,56 @@ void TF_TestCnt::Run( void )
 
 		switch( status )
 		{
-			case 0: // run monitor
-				run_Monitor(  ptrCudaMonitor, nbuf, indexRd[nbuf], streamMonitor );
-				status=1;
-				break;
+//			case 0: // run monitor
+//				run_Monitor(  ptrCudaMonitor, nbuf, td->hostMonitor->status[nbuf].indexRd, streamMonitor );
+//
+//				status=1;
+//				break;
 
 			case 1: // wait for ready current buffer and start DMA  read
-				ret=cudaStreamQuery( streamMonitor );
-				if( cudaSuccess==ret )
+//				ret=cudaStreamQuery( streamMonitor );
+//				if( cudaSuccess==ret )
+				index_wr = td->hostMonitor->status[nbuf].indexWr;
+				index_rd = td->hostMonitor->status[nbuf].indexRd;
+				if( index_wr!=index_rd )
 				{
 
+					//hostBlockRdprintf( "status 1: nbuf=%d index_rd=%d\n", nbuf, indexRd[nbuf]);
 					uint64_t* d_src=(uint64_t*)(td->ptrMonitor->block[nbuf].ptrCudaOut);
-					d_src+=indexRd[nbuf]*td->outputSizeBlock/8;
+					d_src+=td->hostMonitor->status[nbuf].indexRd * td->outputSizeBlock/8;
 
 					cudaMemcpyAsync( td->hostBuffer, d_src, td->outputSizeBlock, cudaMemcpyDeviceToHost, streamDMA );
+					//cudaMemcpy( td->hostBuffer, d_src, td->outputSizeBlock, cudaMemcpyDeviceToHost );
+					//usleep( 1 );
 					status=2;
 				}
+				break;
 			case 2: // wait for data transfer complete
-				ret=cudaStreamQuery( streamDMA );
-				if( cudaSuccess==ret )
+				//ret=cudaStreamQuery( streamDMA );
+				//if( cudaSuccess==ret )
 				{
+					cudaStreamSynchronize( streamDMA );
 					CheckHostData( td->hostBuffer );
 
-					int n=indexRd[nbuf]+1;
+					td->hostBlockRd++;
+					int n=td->hostMonitor->status[nbuf].indexRd+1;
 					if( n==td->outputCountBlock )
 						n=0;
-					indexRd[nbuf]=n;
+					td->hostMonitor->status[nbuf].indexRd=n;
 
 					n=nbuf+1;
-					if( 3==n )
+					if( td->countOfBuffers==n )
 						n=0;
 					nbuf=n;
 
-					status=0;
+					status=1;
 				}
+				break;
 		}
 
 
 
-		//usleep( 100 );
+		usleep( 1000 );
 
 	}
 
@@ -347,6 +421,7 @@ void TF_TestCnt::GetResult( void )
 	GetResultBuffer( 1 );
 	GetResultBuffer( 2 );
 
+	GetHostResult();
 }
 
 /**
@@ -467,7 +542,7 @@ void* TF_TestCnt::FillExecute( void )
 		FillCounter( &td->bar1[0]);
 		td->ptrMonitor->block[0].irqFlag=1;
 
-		usleep( 100 );
+		usleep( 1 );
 		if( td->ptrMonitor->flagExit )
 			break;
 
@@ -482,7 +557,7 @@ void* TF_TestCnt::FillExecute( void )
 		FillCounter( &td->bar1[1]);
 		td->ptrMonitor->block[1].irqFlag=1;
 
-		usleep( 100 );
+		usleep( 1 );
 		if( td->ptrMonitor->flagExit )
 			break;
 
@@ -496,7 +571,7 @@ void* TF_TestCnt::FillExecute( void )
 		FillCounter( &td->bar1[2]);
 		td->ptrMonitor->block[2].irqFlag=1;
 
-		usleep( 100 );
+		usleep( 1 );
 		if( td->ptrMonitor->flagExit )
 			break;
 
@@ -510,5 +585,77 @@ void* TF_TestCnt::FillExecute( void )
 //! Check received data
 void TF_TestCnt::CheckHostData( uint64_t* src )
 {
-	printf( "CheckHostData: 0x%.8lX \n", *src );
+	//printf( "CheckHostData: 0x%.8lX \n", *src );
+
+	int cnt=td->outputSizeBlock/8;
+
+	uint64_t step=TaskCounts;
+	uint64_t val;
+	uint64_t expect_data = td->hostExpectData;
+
+	unsigned int errorCnt=td->hostCheck.cntError;
+
+	int flagError=0;
+	for( int ii=0; ii<cnt; ii++ )
+	{
+		uint64_t	val;
+		val = *src++;
+
+		if( val!=expect_data )
+		{
+			if( errorCnt<16 )
+			{
+				td->hostCheck.nblock[errorCnt]=td->hostBlockRd;
+				td->hostCheck.adr[errorCnt]=ii;
+				td->hostCheck.expect_data[errorCnt]=expect_data;
+				td->hostCheck.receive_data[errorCnt]=val;
+			}
+			errorCnt++;
+			flagError=1;
+		}
+		expect_data+=step;
+	}
+	td->hostExpectData=expect_data;
+	td->hostCheck.cntError=errorCnt;
+	if( flagError )
+	{
+		td->hostBlockError++;
+	}
+	else
+	{
+		td->hostBlockOk++;
+	}
+
+}
+
+//! Print results for host buffer
+void TF_TestCnt::GetHostResult( void )
+{
+	printf( "\nHost \n" );
+	printf( "block_rd=%d\n", td->hostBlockRd );
+	printf( "block_ok=%d\n", td->hostBlockOk);
+	printf( "block_error=%d\n", td->hostBlockError );
+
+	unsigned int cntError=td->hostCheck.cntError;
+	if( 0==cntError )
+	{
+		printf( "Host - Ok\n" );
+	} else
+	{
+		printf( "   cntError=%d\n", cntError);
+		if( cntError>16 )
+			cntError=16;
+		for( int jj=0; jj<cntError; jj++ )
+		{
+		 printf( "%2d block: %4d  addr: 0x%.4X  receive: 0x%.8lX  expect: 0x%.8lX\n",
+				 jj,
+				 td->hostCheck.nblock[jj],
+				 td->hostCheck.adr[jj],
+				 td->hostCheck.receive_data[jj],
+				 td->hostCheck.expect_data[jj]
+			 );
+		}
+	}
+
+
 }

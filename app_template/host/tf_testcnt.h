@@ -91,6 +91,8 @@ public:
 	//! Check received data
 	void CheckHostData( uint64_t* src );
 
+	//! Print results for host buffer
+	void GetHostResult( void );
 };
 
 #endif /* TF_TESTCNT_H_ */

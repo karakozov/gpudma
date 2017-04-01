@@ -55,6 +55,7 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 
 	unsigned int flagError=0;
 
+	TaskHostStatus *ptrHostStatus = ts->ptrHostStatus;
 	shFlagIrq=0;
 
 
@@ -121,6 +122,7 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 				if( n==ts->indexMax )
 					n=0;
 				ts->indexWr=n;
+				ptrHostStatus->indexWr=n;
 			}
 
 		} else
@@ -211,37 +213,37 @@ int run_checkCounter( long *sharedMemory, int nbuf, cudaStream_t& stream  )
 }
 
 
-__global__ void MonitorKernel( long* sharedMemory,  int nbuf, unsigned int index_rd  )
-{
-
-	TaskMonitor *ptrMonitor = (TaskMonitor*)sharedMemory;
-	TaskBufferStatus *ts=(TaskBufferStatus *)sharedMemory;
-	ts+=nbuf;
-
-	for( int loop=0; ; loop++ )
-	{
-		if( 1==ptrMonitor->flagExit )
-		{
-			break;
-		}
-
-		if( index_rd!=ptrMonitor->block[0].indexWr )
-			break;
-
-		for( volatile int jj=0; jj<10000; jj++ );
-	}
-
-
-}
-
-int run_Monitor(  long* sharedMemory, int nbuf, unsigned int index_rd, cudaStream_t stream )
-{
-
-    //Kernel configuration, where a two-dimensional grid and
-    //three-dimensional blocks are configured.
-    dim3 dimGrid(1, 1);
-    dim3 dimBlock(1, 1, 1);
-    MonitorKernel<<<dimGrid, dimBlock, 0, stream>>>(sharedMemory, nbuf, index_rd );
-
-
-}
+//__global__ void MonitorKernel( long* sharedMemory,  int nbuf, unsigned int index_rd  )
+//{
+//
+//	TaskMonitor *ptrMonitor = (TaskMonitor*)sharedMemory;
+//	TaskBufferStatus *ts=(TaskBufferStatus *)sharedMemory;
+//	ts+=nbuf;
+//
+//	for( int loop=0; ; loop++ )
+//	{
+//		if( 1==ptrMonitor->flagExit )
+//		{
+//			break;
+//		}
+//
+//		if( index_rd!=ptrMonitor->block[0].indexWr )
+//			break;
+//
+//		for( volatile int jj=0; jj<10000; jj++ );
+//	}
+//
+//
+//}
+//
+//int run_Monitor(  long* sharedMemory, int nbuf, unsigned int index_rd, cudaStream_t stream )
+//{
+//
+//    //Kernel configuration, where a two-dimensional grid and
+//    //three-dimensional blocks are configured.
+//    dim3 dimGrid(1, 1);
+//    dim3 dimBlock(1, 1, 1);
+//    MonitorKernel<<<dimGrid, dimBlock, 0, stream>>>(sharedMemory, nbuf, index_rd );
+//
+//
+//}
