@@ -47,8 +47,13 @@ struct TaskBufferStatus
 	unsigned int blockError;	//!< count of buffer with errors
 	unsigned int sizeOfKBytes;	//!< size of buffers in kilobytes
 
-	void*	ptrCudaIn;	//!< pointer on bar1 buffer in the Cuda memory
-	void*	ptrCudaOut;	//!< pointer on output buffer in the Cuda memory
+	void*	ptrCudaIn;			//!< pointer on bar1 buffer in the Cuda memory
+
+	void*	ptrCudaOut;			//!< pointer on output buffer in the Cuda memory
+
+	unsigned int	indexWr;	//!< block number for next write
+	unsigned int	indexRd;	//!< block number for read
+	unsigned int	indexMax;	//!< count blocks in output buffer
 
 	TaskCheckData	check[ TaskCounts ]; //!< current results for test one buffer
 };
@@ -68,6 +73,29 @@ struct TaskMonitor
 
 };
 
+/**
+ * 	\brief	Struct for process status in the host memory
+ */
+struct TaskHostStatus
+{
+
+	unsigned int	indexWr;	//!< block number for next write
+	unsigned int	indexRd;	//!< block number for read
+	//unsigned int	indexMax;	//!< count blocks in output buffer
+
+};
+
+/**
+ *  \brief	Struct of data in monitor area in the host memory
+ *
+ */
+struct TaskHostMonitor
+{
+	TaskHostStatus	status[3];	//!< Status of process
+
+};
+
+
 
 /**
  * 	\brief	collection data for TF_TestCnt
@@ -82,10 +110,24 @@ struct TaskData
 
 	int					cycleCnt;
 
-	int					sizeBufferOfBytes;	//!< Size of BAR1 buffer in bytes
-	int					countOfBuffers;		//!< Conunt of buffers, from 1 to 3
+	int 	sizeBufferOfKb;		//!< Size buffer [kbytes]. Must be n*64
+	int 	countOfCycle;		//!< Number of cycle. 0 - infinitely
 
-	void*				decimationBuffers[3];	//!< Buffer in the CUDA memory for
+	int		sizeBufferOfBytes;	//!< Size of BAR1 buffer in bytes
+	int		countOfBuffers;		//!< Conunt of buffers, from 1 to 3
+
+	//void*				decimationBuffers[3];	//!< Buffer in the CUDA memory for
+
+
+	size_t 	outputSizeBuffer; 	//!< size of output buffer [bytes]
+	size_t 	outputSizeBlock;  	//!< size of output block  [bytes]
+	size_t 	outputCountBlock; 	//!< count blocks in the output buffer
+
+
+	uint64_t*	hostBuffer;			//!< data from device
+
+	TaskHostMonitor* hostMonitor;	//!< monitor data in the host memory
+
 
 
 	TaskData()

@@ -8,6 +8,7 @@
 #ifndef TF_TESTCNT_H_
 #define TF_TESTCNT_H_
 
+#include <pthread.h>
 
 #include "tf_testthread.h"
 
@@ -61,11 +62,6 @@ public:
 	char** m_argv;
 
 
-	int m_SizeBufferOfKb;	//!< Size buffer [kbytes]. Must be n*64
-
-	int m_CountOfCycle;		//!< Number of cycle. 0 - infinitely
-
-
 	struct TaskData		*td;		//!< Local data for test
 
     CL_Cuda				*m_pCuda;	//!< Cuda device
@@ -76,6 +72,24 @@ public:
 
     //! Print results for buffer
     void GetResultBuffer( int nbuf );
+
+
+    pthread_t 			m_hFillThread;
+    pthread_attr_t  	m_attrFillThread;
+
+
+    void FillThreadStart( void );
+
+    void FillThreadDestroy( void );
+
+	static void* FillThreadFunc( void* lpvThreadParm );
+
+	void* FillExecute( void );
+
+
+
+	//! Check received data
+	void CheckHostData( uint64_t* src );
 
 };
 

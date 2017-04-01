@@ -27,6 +27,7 @@
 __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 {
 
+	__shared__ int shFlagIrq;
 
 	TaskMonitor *ptrMonitor = (TaskMonitor*)sharedMemory;
 	TaskBufferStatus *ts=(TaskBufferStatus *)sharedMemory;
@@ -42,6 +43,8 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 	uint64_t *src = (uint64_t*)(ts->ptrCudaIn);
 	src+=threadIdx.x;
 
+	uint64_t *dst;
+
 	TaskCheckData* check= &(ts->check[threadIdx.x]);
 
 	unsigned int totalErrorForBuf=0;
@@ -52,6 +55,7 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 
 	unsigned int flagError=0;
 
+	shFlagIrq=0;
 
 
 	//printf( "src=%p  x=%d y=%d z=%d expect_data=0x%.8lX\n", src, threadIdx.x, threadIdx.y, threadIdx.z, expect_data );
@@ -64,7 +68,11 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 			break;
 		}
 
-		if( 1!=ts->irqFlag )
+		if( 0==threadIdx.x )
+			shFlagIrq=ts->irqFlag;
+
+
+		if( 1!=shFlagIrq )
 		{
 			for( volatile int jj=0; jj<1000; jj++ );
 
@@ -79,25 +87,67 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 
 		flagError=0;
 		check->flagError=1;
-		for( int ii=0; ii<cnt; ii++ )
-		{
-			uint64_t	val;
-			val = *src; src+=step;
 
-			if( val!=expect_data )
+		if( 0==threadIdx.x )
+		{
+
+			dst=(uint64_t*)(ts->ptrCudaOut);
+			dst+= ts->indexWr * cnt;
+
+			for( int ii=0; ii<cnt; ii++ )
 			{
-				if( errorCnt<16 )
+				uint64_t	val;
+				val = *src; src+=step;
+
+				*dst++ = val;
+
+				if( val!=expect_data )
 				{
-					check->nblock[errorCnt]=block_rd;
-					check->adr[errorCnt]=ii;
-					check->expect_data[errorCnt]=expect_data;
-					check->receive_data[errorCnt]=val;
+					if( errorCnt<16 )
+					{
+						check->nblock[errorCnt]=block_rd;
+						check->adr[errorCnt]=ii;
+						check->expect_data[errorCnt]=expect_data;
+						check->receive_data[errorCnt]=val;
+					}
+					errorCnt++;
+					flagError++;
 				}
-				errorCnt++;
-				flagError++;
+				expect_data+=step;
 			}
-			expect_data+=step;
+
+			{
+				int n=ts->indexWr+1;
+				if( n==ts->indexMax )
+					n=0;
+				ts->indexWr=n;
+			}
+
+		} else
+		{
+			for( int ii=0; ii<cnt; ii++ )
+			{
+				uint64_t	val;
+				val = *src; src+=step;
+
+				if( val!=expect_data )
+				{
+					if( errorCnt<16 )
+					{
+						check->nblock[errorCnt]=block_rd;
+						check->adr[errorCnt]=ii;
+						check->expect_data[errorCnt]=expect_data;
+						check->receive_data[errorCnt]=val;
+					}
+					errorCnt++;
+					flagError++;
+				}
+				expect_data+=step;
+			}
+
 		}
+
+
 		check->flagError=flagError;
 		check->cntError=errorCnt;
 
@@ -143,61 +193,55 @@ __global__ void checkCounterKernel( long *sharedMemory, int nbuf )
 /**
  * 		\brief	start checkCounterKernel
  *
- * 		\param	ptrMonitor	pointer in CUDA memory of shared data
- * 		\param	nbuf		number of buffer
- * 		\param	stream		CUDA stream for this kernel
+ * 		\param	sharedMemory	pointer in CUDA memory of shared data
+ * 		\param	nbuf			number of buffer
+ * 		\param	stream			CUDA stream for this kernel
  *
  */
-int run_checkCounter( long *ptrMonitor, int nbuf, cudaStream_t& stream  )
+int run_checkCounter( long *sharedMemory, int nbuf, cudaStream_t& stream  )
 {
 
     //Kernel configuration, where a two-dimensional grid and
     //three-dimensional blocks are configured.
     dim3 dimGrid(1, 1);
     dim3 dimBlock(TaskCounts, 1, 1);
-    checkCounterKernel<<<dimGrid, dimBlock, 0, stream>>>( ptrMonitor, nbuf );
+    checkCounterKernel<<<dimGrid, dimBlock, 0, stream>>>( sharedMemory, nbuf );
 
    return 0;
 }
 
 
-//__global__ void MonitorKernel( long* src )
-//{
-////    printf("[%d, %d]:\t\tValue is:%d\n",\
-////            blockIdx.y*gridDim.x+blockIdx.x,\
-////            threadIdx.z*blockDim.x*blockDim.y+threadIdx.y*blockDim.x+threadIdx.x,\
-////            sizeof(long));
-//
-//	printf( "Monitor start: src=%p  \n", src);
-//
-//	TaskMonitor *ptrMonitor = (TaskMonitor*)src;
-//	for( int loop=0; ; loop++ )
-//	{
-//		if( 1==ptrMonitor->flagExit )
-//		{
-//			break;
-//		}
-//
-//		if( 1==ptrMonitor->block[0].irqFlag )
-//		{
-//			ptrMonitor->block[0].irqFlag=2;
-//			ptrMonitor->block[0].blockRd++;
-//
-//		}
-//	}
-//	printf( "Monitor stop \n");
-//
-//
-//}
-//
-//int run_Monitor( long* src, cudaStream_t stream )
-//{
-//
-//    //Kernel configuration, where a two-dimensional grid and
-//    //three-dimensional blocks are configured.
-//    dim3 dimGrid(1, 1);
-//    dim3 dimBlock(1, 1, 1);
-//    MonitorKernel<<<dimGrid, dimBlock, 0, stream>>>(src );
-//
-//
-//}
+__global__ void MonitorKernel( long* sharedMemory,  int nbuf, unsigned int index_rd  )
+{
+
+	TaskMonitor *ptrMonitor = (TaskMonitor*)sharedMemory;
+	TaskBufferStatus *ts=(TaskBufferStatus *)sharedMemory;
+	ts+=nbuf;
+
+	for( int loop=0; ; loop++ )
+	{
+		if( 1==ptrMonitor->flagExit )
+		{
+			break;
+		}
+
+		if( index_rd!=ptrMonitor->block[0].indexWr )
+			break;
+
+		for( volatile int jj=0; jj<10000; jj++ );
+	}
+
+
+}
+
+int run_Monitor(  long* sharedMemory, int nbuf, unsigned int index_rd, cudaStream_t stream )
+{
+
+    //Kernel configuration, where a two-dimensional grid and
+    //three-dimensional blocks are configured.
+    dim3 dimGrid(1, 1);
+    dim3 dimBlock(1, 1, 1);
+    MonitorKernel<<<dimGrid, dimBlock, 0, stream>>>(sharedMemory, nbuf, index_rd );
+
+
+}
