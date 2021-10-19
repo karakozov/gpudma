@@ -80,7 +80,7 @@ static int gpumem_proc_show(struct seq_file *m, void *v)
 
 static int gpumem_proc_open(struct inode *inode, struct file *file)
 {
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 9, 0))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
     struct gpumem *p = (struct gpumem *)PDE_DATA(inode);
 #else
     struct gpumem *p = (struct gpumem *)PDE(inode)->data;
@@ -96,7 +96,14 @@ static int gpumem_proc_release(struct inode *inode, struct file *file)
 }
 
 //--------------------------------------------------------------------
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
+static const struct proc_ops gpumem_proc_fops = {
+    .proc_open           = gpumem_proc_open,
+    .proc_read           = seq_read,
+    .proc_lseek          = seq_lseek,
+    .proc_release        = gpumem_proc_release,
+};
+#else
 static const struct file_operations gpumem_proc_fops = {
     .owner          = THIS_MODULE,
     .open           = gpumem_proc_open,
@@ -104,6 +111,7 @@ static const struct file_operations gpumem_proc_fops = {
     .llseek         = seq_lseek,
     .release        = gpumem_proc_release,
 };
+#endif
 
 //--------------------------------------------------------------------
 
